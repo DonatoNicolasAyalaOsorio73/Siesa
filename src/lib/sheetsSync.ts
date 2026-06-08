@@ -1,8 +1,14 @@
 // ─── Helper cliente para sincronizar con Google Sheets via API routes ─────────
 
 export async function cargarDeSheets<T>(tabla: string): Promise<T[] | null> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 12000)
   try {
-    const res = await fetch(`/api/sheets/${tabla}`, { cache: 'no-store' })
+    const res = await fetch(`/api/sheets/${tabla}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+    clearTimeout(timer)
     if (!res.ok) {
       console.warn(`[Sheets] GET ${tabla} → HTTP ${res.status}`)
       return null
@@ -12,10 +18,12 @@ export async function cargarDeSheets<T>(tabla: string): Promise<T[] | null> {
       console.warn(`[Sheets] GET ${tabla} → respuesta no es array:`, data)
       return null
     }
-    console.info(`[Sheets] ✓ ${tabla}: ${data.length} registros cargados`)
+    console.info(`[Sheets] ✓ ${tabla}: ${data.length} registros`)
     return data as T[]
   } catch (err: unknown) {
-    console.error(`[Sheets] GET ${tabla} → error:`, err instanceof Error ? err.message : err)
+    clearTimeout(timer)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Sheets] GET ${tabla} → error:`, msg)
     return null
   }
 }

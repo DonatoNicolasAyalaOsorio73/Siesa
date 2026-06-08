@@ -141,13 +141,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const ordenesRef = useRef(ordenes)
   useEffect(() => { ordenesRef.current = ordenes }, [ordenes])
 
-  // Fuente de verdad: Google Sheets
-  useEffect(() => {
+  function cargarTodo() {
+    setCargando(true)
+    const safety = setTimeout(() => setCargando(false), 15000)
     Promise.all([
       cargarDeSheets<OrdenProduccion>('ordenes'),
       cargarDeSheets<Muestra>('muestras'),
       cargarDeSheets<Alerta>('alertas'),
     ]).then(([ord, mue, ale]) => {
+      clearTimeout(safety)
       if (ord && ord.length > 0) {
         setOrdenes(ord)
         setOrdenesConInspeccionPendiente(ord.filter((o) => o.requiereInspeccion).map((o) => o.id))
@@ -156,8 +158,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (mue && mue.length > 0) setMuestras(mue)
       if (ale && ale.length > 0) setAlertas(ale)
       setCargando(false)
-    }).catch(() => setCargando(false))
-  }, [])
+    }).catch(() => { clearTimeout(safety); setCargando(false) })
+  }
+
+  // Fuente de verdad: Google Sheets
+  useEffect(() => { cargarTodo() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const notificacionesCount = alertas.filter((a) => !a.leida).length
 

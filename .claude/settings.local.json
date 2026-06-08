@@ -59,7 +59,14 @@
       "Bash(npx next *)",
       "PowerShell(cd C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa; $env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; node --version; npx --version)",
       "PowerShell(cd C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa; $env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; npx next build 2>&1 | Select-Object -Last 80)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "PowerShell(cd C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa; $env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; npx next build 2>&1 | Select-Object -Last 40)",
+      "Bash(Get-ChildItem -Path . -Recurse -Directory)",
+      "Bash(findstr /E \"\\\\\\\\ia\\\\\\\\|\\\\\\\\ai\\\\\\\\\")",
+      "Bash(xargs grep -l \"modo.*optimizar\\\\|modo.*analizar\\\\|modo.*prediccion\\\\|modo.*asistente\")",
+      "PowerShell($env:PATH -split ';' | Where-Object { $_ -match 'node' })",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" --version 2>&1)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tsc --noEmit 2>&1 | Select-Object -First 80)"
     ]
   }
 }

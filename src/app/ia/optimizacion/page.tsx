@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Zap, Loader2, AlertTriangle, CheckCircle2, Play, BarChart2, Brain,
   RefreshCw, ArrowRight, Target, Activity,
@@ -144,6 +144,60 @@ export default function OptimizacionIAPage() {
   const [errorCausas, setErrorCausas] = useState<string | null>(null)
   const [isMockOpt, setIsMockOpt] = useState(false)
   const [isMockCausas, setIsMockCausas] = useState(false)
+  const [razonOpt, setRazonOpt] = useState<string | null>(null)
+  const [razonCausas, setRazonCausas] = useState<string | null>(null)
+  const [countdownOpt, setCountdownOpt] = useState<number | null>(null)
+  const [countdownCausas, setCountdownCausas] = useState<number | null>(null)
+  const countdownOptRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const countdownCausasRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Auto-reintento para optimización
+  useEffect(() => {
+    if (countdownOptRef.current) clearInterval(countdownOptRef.current)
+    if (razonOpt?.startsWith('CUOTA:') && !loadingOpt) {
+      const seg = parseInt(razonOpt.split(':')[1], 10) || 60
+      setCountdownOpt(seg)
+      countdownOptRef.current = setInterval(() => {
+        setCountdownOpt((prev) => {
+          if (prev === null || prev <= 1) {
+            if (countdownOptRef.current) clearInterval(countdownOptRef.current)
+            setCountdownOpt(null)
+            setTimeout(() => handleOptimizar(), 100)
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } else {
+      setCountdownOpt(null)
+    }
+    return () => { if (countdownOptRef.current) clearInterval(countdownOptRef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [razonOpt])
+
+  // Auto-reintento para causas raíz
+  useEffect(() => {
+    if (countdownCausasRef.current) clearInterval(countdownCausasRef.current)
+    if (razonCausas?.startsWith('CUOTA:') && !loadingCausas) {
+      const seg = parseInt(razonCausas.split(':')[1], 10) || 60
+      setCountdownCausas(seg)
+      countdownCausasRef.current = setInterval(() => {
+        setCountdownCausas((prev) => {
+          if (prev === null || prev <= 1) {
+            if (countdownCausasRef.current) clearInterval(countdownCausasRef.current)
+            setCountdownCausas(null)
+            setTimeout(() => handleAnalizarCausas(), 100)
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } else {
+      setCountdownCausas(null)
+    }
+    return () => { if (countdownCausasRef.current) clearInterval(countdownCausasRef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [razonCausas])
 
   async function handleOptimizar() {
     setLoadingOpt(true)
@@ -171,13 +225,14 @@ export default function OptimizacionIAPage() {
       if (data.ok) {
         setOptimizacion(data.optimizacion)
         setIsMockOpt(data.mock ?? false)
+        setRazonOpt(data.razon ?? null)
       } else {
         throw new Error(data.error ?? 'Error desconocido')
       }
     } catch {
-      // Fallback offline
       setOptimizacion(mockOptimizacion(ordenes))
       setIsMockOpt(true)
+      setRazonOpt('RED')
     } finally {
       setLoadingOpt(false)
     }
@@ -208,12 +263,14 @@ export default function OptimizacionIAPage() {
       if (data.ok) {
         setCausas(data.causas)
         setIsMockCausas(data.mock ?? false)
+        setRazonCausas(data.razon ?? null)
       } else {
         throw new Error(data.error ?? 'Error desconocido')
       }
     } catch {
       setCausas(mockCausas(noConformidades))
       setIsMockCausas(true)
+      setRazonCausas('RED')
     } finally {
       setLoadingCausas(false)
     }
@@ -287,9 +344,15 @@ export default function OptimizacionIAPage() {
           {optimizacion && !loadingOpt && (
             <div className="space-y-5">
               {isMockOpt && (
-                <div className="flex items-center gap-2 text-[11px] text-[#F59E0B] bg-[#FEF3E2] px-3 py-2 rounded-lg">
+                <div className={`flex items-center gap-2 text-[11px] px-3 py-2 rounded-lg ${razonOpt?.startsWith('CUOTA:') ? 'bg-[#FEF3E2] text-[#D97706]' : razonOpt === 'SIN_KEY' ? 'bg-[#FDECEC] text-[#DC2626]' : 'bg-[#FEF3E2] text-[#D97706]'}`}>
                   <AlertTriangle size={13} />
-                  Análisis offline — conecta GEMINI_API_KEY para análisis en tiempo real
+                  {razonOpt?.startsWith('CUOTA:')
+                    ? countdownOpt !== null
+                      ? `Cuota Gemini agotada — reintentando automáticamente en ${countdownOpt}s…`
+                      : 'Cuota Gemini agotada — reintentando… Análisis generado localmente.'
+                    : razonOpt === 'SIN_KEY'
+                    ? 'Sin GEMINI_API_KEY — configura la clave en .env.local para IA real.'
+                    : 'Análisis offline — Gemini no disponible. Lógica local aplicada.'}
                 </div>
               )}
 
@@ -402,9 +465,15 @@ export default function OptimizacionIAPage() {
           {causas && !loadingCausas && (
             <div className="space-y-5">
               {isMockCausas && (
-                <div className="flex items-center gap-2 text-[11px] text-[#F59E0B] bg-[#FEF3E2] px-3 py-2 rounded-lg">
+                <div className={`flex items-center gap-2 text-[11px] px-3 py-2 rounded-lg ${razonCausas?.startsWith('CUOTA:') ? 'bg-[#FEF3E2] text-[#D97706]' : razonCausas === 'SIN_KEY' ? 'bg-[#FDECEC] text-[#DC2626]' : 'bg-[#FEF3E2] text-[#D97706]'}`}>
                   <AlertTriangle size={13} />
-                  Análisis offline — conecta GEMINI_API_KEY para análisis en tiempo real
+                  {razonCausas?.startsWith('CUOTA:')
+                    ? countdownCausas !== null
+                      ? `Cuota Gemini agotada — reintentando automáticamente en ${countdownCausas}s…`
+                      : 'Cuota Gemini agotada — reintentando… Análisis generado localmente.'
+                    : razonCausas === 'SIN_KEY'
+                    ? 'Sin GEMINI_API_KEY — configura la clave en .env.local para IA real.'
+                    : 'Análisis offline — Gemini no disponible. Lógica local aplicada.'}
                 </div>
               )}
 

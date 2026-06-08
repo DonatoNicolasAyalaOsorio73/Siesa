@@ -26,6 +26,7 @@ interface ClasificacionIA {
   requiereDetencion: boolean
   confianza: number
   _mock?: boolean
+  _razon?: string
 }
 
 interface InspectionFormProps {
@@ -61,11 +62,38 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   const [iaError, setIaError] = useState<string | null>(null)
   const [iaAplicado, setIaAplicado] = useState(false)
   const [dictando, setDictando] = useState(false)
+  const [countdownIA, setCountdownIA] = useState<number | null>(null)
   const [speechDisponible] = useState(() => {
     if (typeof window === 'undefined') return false
     return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
   })
   const reconocimientoRef = useRef<any>(null)
+  const countdownIARef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Auto-reintento cuando hay CUOTA:N
+  useEffect(() => {
+    if (countdownIARef.current) clearInterval(countdownIARef.current)
+    const razon = iaResultado?._razon
+    if (razon?.startsWith('CUOTA:') && !iaLoading) {
+      const seg = parseInt(razon.split(':')[1], 10) || 60
+      setCountdownIA(seg)
+      countdownIARef.current = setInterval(() => {
+        setCountdownIA((prev) => {
+          if (prev === null || prev <= 1) {
+            if (countdownIARef.current) clearInterval(countdownIARef.current)
+            setCountdownIA(null)
+            setTimeout(() => handleAnalizarIA(), 100)
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } else {
+      setCountdownIA(null)
+    }
+    return () => { if (countdownIARef.current) clearInterval(countdownIARef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [iaResultado?._razon])
 
   const ctxOrden = contextoOrden ?? {
     id: 'N/D',
@@ -146,12 +174,12 @@ export default function InspectionForm({ parametros, onResultadosChange, context
       })
       const data = await res.json()
       if (data.ok) {
-        setIaResultado({ ...data.clasificacion, _mock: data.mock === true })
+        setIaResultado({ ...data.clasificacion, _mock: data.mock === true, _razon: data.razon })
       } else {
         setIaError('No se pudo analizar el mensaje. Intenta de nuevo.')
       }
     } catch {
-      setIaError('⚠ Siesa AI no disponible — Completa el formulario manualmente')
+      setIaError('⚠ Error de red — Completa el formulario manualmente')
     } finally {
       setIaLoading(false)
     }
@@ -234,6 +262,31 @@ export default function InspectionForm({ parametros, onResultadosChange, context
             </button>
           </div>
 
+          {/* Banner sin API key / clave inválida */}
+          {(iaResultado?._razon === 'SIN_KEY' || iaResultado?._razon === 'CLAVE_INVALIDA') && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-[#FDECEC] border border-[#EF4444]/20 text-xs text-[#DC2626]">
+              <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>{iaResultado._razon === 'SIN_KEY' ? 'Falta GEMINI_API_KEY' : 'Clave Gemini inválida'}</strong>
+                {' '}— revisa <code className="font-mono bg-white/70 px-1 rounded">.env.local</code>. El análisis mostrado es local (aproximado).
+              </span>
+            </div>
+          )}
+
+          {/* Banner cuota agotada */}
+          {iaResultado?._razon?.startsWith('CUOTA:') && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3E2] border border-[#F59E0B]/20 text-xs text-[#D97706]">
+              <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>Cuota Gemini agotada</strong> —{' '}
+                {countdownIA !== null
+                  ? <>reintentando automáticamente en <strong>{countdownIA}s</strong>…</>
+                  : <>límite gratuito alcanzado. El análisis mostrado es local (aproximado).</>
+                }
+              </span>
+            </div>
+          )}
+
           {/* Error */}
           {iaError && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3E2] border border-[#FEF3E2] text-xs text-[#D97706]">
@@ -251,8 +304,17 @@ export default function InspectionForm({ parametros, onResultadosChange, context
                   Resultado del análisis
                 </p>
                 {iaResultado._mock && (
-                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#FEF3E2] text-[#D97706]">
-                    Modo offline
+                  <span
+                    className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: iaResultado._razon === 'SIN_KEY' || iaResultado._razon === 'CLAVE_INVALIDA' ? '#FDECEC' : '#FEF3E2',
+                      color: iaResultado._razon === 'SIN_KEY' || iaResultado._razon === 'CLAVE_INVALIDA' ? '#DC2626' : '#D97706',
+                    }}
+                  >
+                    {iaResultado._razon === 'SIN_KEY' ? '⚠ Sin API Key'
+                      : iaResultado._razon === 'CLAVE_INVALIDA' ? '⚠ Clave inválida'
+                      : iaResultado._razon?.startsWith('CUOTA:') ? '⏱ Cuota agotada'
+                      : 'Modo offline'}
                   </span>
                 )}
               </div>

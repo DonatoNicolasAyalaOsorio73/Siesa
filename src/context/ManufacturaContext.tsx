@@ -107,18 +107,20 @@ export function ManufacturaProvider({ children }: { children: ReactNode }) {
 
   // Fuente de verdad: Google Sheets
   useEffect(() => {
+    const safety = setTimeout(() => setCargando(false), 15000)
     Promise.all([
       cargarDeSheets<CentroTrabajo>('centros'),
       cargarDeSheets<Ruta>('rutas'),
       cargarDeSheets<BomProducto>('bom'),
       cargarDeSheets<RegistroTiempo>('registrosTiempos'),
     ]).then(([c, r, b, rt]) => {
+      clearTimeout(safety)
       if (c && c.length > 0) setCentros(c)
       if (r && r.length > 0) setRutasState(r)
       if (b && b.length > 0) setBom(b)
       if (rt && rt.length > 0) setRegistrosTiempos(rt)
       setCargando(false)
-    }).catch(() => setCargando(false))
+    }).catch(() => { clearTimeout(safety); setCargando(false) })
   }, [])
 
   // ── Centros ──────────────────────────────────────────────────────────────────

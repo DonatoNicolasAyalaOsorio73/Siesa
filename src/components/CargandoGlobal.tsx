@@ -1,15 +1,27 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useAppContext } from '@/context/AppContext'
 import { useManufacturaContext } from '@/context/ManufacturaContext'
 import { useCalidadContext } from '@/context/CalidadContext'
+import { RefreshCw } from 'lucide-react'
 
 export default function CargandoGlobal({ children }: { children: React.ReactNode }) {
-  const { cargando: cApp } = useAppContext()
-  const { cargando: cMfg } = useManufacturaContext()
-  const { cargando: cCal } = useCalidadContext()
+  const { cargando: cApp, ordenes } = useAppContext()
+  const { cargando: cMfg, centros } = useManufacturaContext()
+  const { cargando: cCal, fichasMutable } = useCalidadContext()
 
   const cargando = cApp || cMfg || cCal
+  const [mostrarError, setMostrarError] = useState(false)
+
+  // Si tras 15s de carga finalizada no hay datos, mostrar error
+  useEffect(() => {
+    if (!cargando) {
+      const noHayDatos = ordenes.length === 0 && centros.length === 0 && fichasMutable.length === 0
+      if (noHayDatos) setMostrarError(true)
+      else setMostrarError(false)
+    }
+  }, [cargando, ordenes.length, centros.length, fichasMutable.length])
 
   return (
     <>
@@ -54,6 +66,24 @@ export default function CargandoGlobal({ children }: { children: React.ReactNode
           `}</style>
         </div>
       )}
+
+      {!cargando && mostrarError && (
+        <div
+          className="fixed top-4 right-4 z-40 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-sm"
+          style={{ background: '#FEF3E2', borderColor: '#F59E0B', color: '#92400E' }}
+        >
+          <span className="font-semibold">Sin datos de Google Sheets</span>
+          <button
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+            style={{ background: '#F59E0B', color: 'white' }}
+          >
+            <RefreshCw size={12} />
+            Reintentar
+          </button>
+        </div>
+      )}
+
       {children}
     </>
   )

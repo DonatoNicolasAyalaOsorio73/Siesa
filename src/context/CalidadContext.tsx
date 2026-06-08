@@ -143,18 +143,20 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
 
   // Fuente de verdad: Google Sheets
   useEffect(() => {
+    const safety = setTimeout(() => setCargando(false), 15000)
     Promise.all([
       cargarDeSheets<Inspeccion>('inspecciones'),
       cargarDeSheets<NoConformidad>('noConformidades'),
       cargarDeSheets<FichaTecnica>('fichas'),
       cargarDeSheets<EventoTrazabilidad>('trazabilidad'),
     ]).then(([ins, ncs, fic, trz]) => {
+      clearTimeout(safety)
       if (ins && ins.length > 0) setInspecciones(ins)
       if (ncs && ncs.length > 0) setNoConformidades(ncs)
       if (fic && fic.length > 0) setFichasMutable(fic)
       if (trz && trz.length > 0) setTrazabilidad(trz)
       setCargando(false)
-    }).catch(() => setCargando(false))
+    }).catch(() => { clearTimeout(safety); setCargando(false) })
   }, [])
 
   // Refs para evitar stale closures sin agregar inspecciones/ordenes al dep array

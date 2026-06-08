@@ -8,19 +8,6 @@ import {
 import { useAppContext, type PrediccionIA, type OrdenCriticaIA, type AlertaPredictivaIA } from '@/context/AppContext'
 import { useCalidadContext, tiempoEsperaMin } from '@/context/CalidadContext'
 
-// ─── DATOS ESTÁTICOS PARA PAYLOAD ────────────────────────────────────────────
-
-const NC_DEMO = [
-  {
-    id: 'NC-001',
-    producto: 'Válvula de Escape XR-500',
-    tipoDefecto: 'Dureza fuera de especificación',
-    severidad: 'CRITICA',
-    estadoCierre: 'EN_PROCESO',
-    cantidadAfectada: 23,
-  },
-]
-
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 const MENSAJES_CARGA = [
@@ -108,7 +95,7 @@ function OrdenCard({ orden }: { orden: OrdenCriticaIA }) {
 
 export default function PrediccionPage() {
   const { ordenes, prediccionIA, setPrediccionIA } = useAppContext()
-  const { inspecciones } = useCalidadContext()
+  const { inspecciones, noConformidades } = useCalidadContext()
 
   const fpyPorLinea = useMemo(() => {
     const lineas = Array.from(new Set(ordenes.map((o) => o.lineaProduccion))).sort()
@@ -129,10 +116,40 @@ export default function PrediccionPage() {
   const [mensajeCargaIdx, setMensajeCargaIdx] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [esMock, setEsMock] = useState(false)
+  const [razonMock, setRazonMock] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState<number | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Auto-reintento cuando countdown llega a 0
+  useEffect(() => {
+    if (countdownRef.current) clearInterval(countdownRef.current)
+    if (razonMock?.startsWith('CUOTA:') && !loading) {
+      const seg = parseInt(razonMock.split(':')[1], 10) || 60
+      setCountdown(seg)
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            if (countdownRef.current) clearInterval(countdownRef.current)
+            setCountdown(null)
+            setTimeout(() => ejecutarAnalisis(), 100)
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } else {
+      setCountdown(null)
+    }
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [razonMock])
 
   useEffect(() => {
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (countdownRef.current) clearInterval(countdownRef.current)
+    }
   }, [])
 
   async function ejecutarAnalisis() {
@@ -160,7 +177,14 @@ export default function PrediccionPage() {
           requiereInspeccion: o.requiereInspeccion,
         })),
         indicadores: fpyPorLinea,
-        noConformidades: NC_DEMO,
+        noConformidades: noConformidades.map((nc) => ({
+          id: nc.id,
+          producto: nc.producto,
+          tipoDefecto: nc.tipoDefecto,
+          severidad: nc.severidad,
+          estadoCierre: nc.estadoCierre,
+          cantidadAfectada: nc.cantidadAfectada,
+        })),
       }
 
       const res = await fetch('/api/ia', {
@@ -172,12 +196,13 @@ export default function PrediccionPage() {
 
       if (data.ok) {
         setEsMock(data.mock === true)
+        setRazonMock(data.razon ?? null)
         setPrediccionIA({ ...data.prediccion, timestamp: new Date().toISOString() })
       } else {
         setError(data.error || 'Error desconocido al llamar la API')
       }
     } catch {
-      setError('No se pudo conectar. Recarga la página e intenta de nuevo.')
+      setError('No se pudo conectar con el servidor. Recarga la página e intenta de nuevo.')
     } finally {
       if (intervalRef.current) clearInterval(intervalRef.current)
       setLoading(false)
@@ -222,19 +247,13 @@ export default function PrediccionPage() {
           </div>
 
           {error && (
-            <div className="w-full max-w-lg flex flex-col gap-2 p-4 rounded-xl bg-[#FDECEC] border border-[#FDECEC] text-left">
+            <div className="w-full max-w-lg flex flex-col gap-2 p-4 rounded-xl bg-[#FDECEC] border border-[#EF4444]/20 text-left">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle size={16} className="text-[#EF4444] flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-semibold text-[#DC2626]">Error al llamar a Gemini API</p>
+                <p className="text-sm font-semibold text-[#DC2626]">Error de conexión con Gemini</p>
               </div>
-              <p className="text-xs font-mono text-[#5A6B85] bg-white/70 rounded-lg p-2 border border-[#FDECEC] break-all">
+              <p className="text-xs font-mono text-[#5A6B85] bg-white/70 rounded-lg p-2 border border-[#EF4444]/10 break-all">
                 {error}
-              </p>
-              <p className="text-xs text-[#97A4B8]">
-                La clave Gemini debe empezar con <code className="font-mono bg-white/80 px-1 rounded">AIza</code>.
-                Obtén una en{' '}
-                <span className="font-semibold text-[#6E56E0]">aistudio.google.com/app/apikey</span>
-                {' '}y reemplaza <code className="font-mono bg-white/80 px-1 rounded">GEMINI_API_KEY</code> en <code className="font-mono bg-white/80 px-1 rounded">.env.local</code>.
               </p>
             </div>
           )}
@@ -278,16 +297,27 @@ export default function PrediccionPage() {
           {/* Botón actualizar + banner modo offline */}
           <div className="flex items-center justify-between gap-3 flex-wrap">
             {esMock ? (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FEF3E2] border border-[#FEF3E2] text-xs text-[#D97706]">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${
+                razonMock === 'SIN_KEY' || razonMock === 'CLAVE_INVALIDA'
+                  ? 'bg-[#FDECEC] text-[#DC2626]'
+                  : 'bg-[#FEF3E2] text-[#D97706]'
+              }`}>
                 <AlertTriangle size={12} />
                 <span>
-                  <strong>Modo offline</strong> — Gemini no disponible. Análisis generado con lógica local basada en los datos reales.
+                  {razonMock === 'SIN_KEY' && <><strong>Sin API Key</strong> — configura GEMINI_API_KEY en .env.local.</>}
+                  {razonMock === 'CLAVE_INVALIDA' && <><strong>Clave Gemini inválida</strong> — verifica GEMINI_API_KEY en .env.local.</>}
+                  {razonMock?.startsWith('CUOTA:') && (
+                    countdown !== null
+                      ? <><strong>Cuota agotada</strong> — reintentando automáticamente en <strong>{countdown}s</strong>… Análisis local activo.</>
+                      : <><strong>Cuota agotada</strong> — límite gratuito de Gemini alcanzado. Reintentando… Análisis generado con lógica local.</>
+                  )}
+                  {(!razonMock || razonMock === 'RED') && <><strong>Modo offline</strong> — Análisis generado con lógica local basada en los datos reales.</>}
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-[10px] text-[#97A4B8]">
                 <Sparkles size={11} className="text-[#6E56E0]" />
-                Análisis generado por Gemini 1.5 Flash
+                Análisis generado por Gemini 2.0 Flash
               </div>
             )}
             <button
@@ -394,7 +424,7 @@ export default function PrediccionPage() {
             <p className="text-sm text-[#5A6B85] leading-relaxed">{resultado.resumenEjecutivo}</p>
             <p className="text-[10px] text-[#97A4B8] mt-3 flex items-center gap-1">
               <Sparkles size={10} />
-              Análisis generado por Siesa AI — Claude claude-opus-4-5
+              Análisis generado por Siesa AI — Gemini 2.0 Flash
             </p>
           </div>
         </div>
