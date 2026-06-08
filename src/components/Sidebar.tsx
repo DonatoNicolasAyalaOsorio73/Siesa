@@ -128,12 +128,13 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const { ordenes, ordenesConInspeccionPendiente } = useAppContext()
+  const { ordenes, ordenesConInspeccionPendiente, alertas } = useAppContext()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const ordenesActivas = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
-  const alertasCalidad = mounted ? ordenesConInspeccionPendiente.length : 0
+  const ordenesActivas  = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
+  const alertasCalidad  = mounted ? ordenesConInspeccionPendiente.length : 0
+  const sinLeer         = mounted ? alertas.filter((a) => !a.leida).length : 0
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
   const isDashboardActive = pathname === '/' || pathname === '/dashboard'
@@ -239,7 +240,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* ── FOOTER USUARIO ── */}
         <div className="px-[14px] pb-[14px] border-t border-white/10">
-          <div className="flex items-center gap-[11px] px-[8px] py-[8px] rounded-[12px] cursor-pointer hover:bg-white/10 transition-all duration-150 mt-[14px]">
+          {/* Badge notificaciones sin leer */}
+          {sinLeer > 0 && (
+            <div className="flex items-center gap-2 mx-[8px] mt-[12px] px-3 py-2 rounded-[10px] bg-white/10 border border-white/20">
+              <div className="w-5 h-5 rounded-full bg-[#EF4444] flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-[10px] font-bold leading-none">{sinLeer > 9 ? '9+' : sinLeer}</span>
+              </div>
+              <span className="text-[11px] text-white/90 font-medium">
+                {sinLeer === 1 ? '1 notificación sin leer' : `${sinLeer} notificaciones sin leer`}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-[11px] px-[8px] py-[8px] rounded-[12px] cursor-pointer hover:bg-white/10 transition-all duration-150 mt-[10px]">
             {/* Avatar blanco */}
             <div className="w-[36px] h-[36px] rounded-[10px] bg-white flex items-center justify-center shrink-0">
               <span className="text-[#1557C9] font-poppins font-bold text-[13px]">OP</span>

@@ -108,6 +108,7 @@ interface AppState {
   prediccionIA: PrediccionIA | null
   completarOperacion: (ordenId: string) => void
   rechazarLote: (loteId: string, ordenId: string) => void
+  resolverInspeccionPendiente: (ordenId: string) => void
   marcarAlertaLeida: (alertaId: string) => void
   marcarTodasLeidas: () => void
   eliminarAlerta: (alertaId: string) => void
@@ -207,6 +208,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       modulo: 'CALIDAD',
     })
   }, [crearAlerta])
+
+  // Limpia el flag de inspección pendiente cuando una inspección se cierra (aprobada o rechazada)
+  const resolverInspeccionPendiente = useCallback((ordenId: string) => {
+    setOrdenesConInspeccionPendiente((prev) => prev.filter((id) => id !== ordenId))
+    const orden = ordenesRef.current.find((o) => o.id === ordenId)
+    if (orden && orden.requiereInspeccion) {
+      const updated = { ...orden, requiereInspeccion: false }
+      setOrdenes((prev) => prev.map((o) => (o.id === ordenId ? updated : o)))
+      pushASheets('ordenes', 'PUT', { id: ordenId, requiereInspeccion: false })
+    }
+  }, [])
 
   const rechazarLote = useCallback((loteId: string, ordenId: string) => {
     const orden = ordenesRef.current.find((o) => o.id === ordenId)
@@ -317,6 +329,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         lotesRechazados,
         completarOperacion,
         rechazarLote,
+        resolverInspeccionPendiente,
         marcarAlertaLeida,
         marcarTodasLeidas,
         eliminarAlerta,

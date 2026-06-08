@@ -133,7 +133,7 @@ function crearInspeccionDesdeOrden(orden: OrdenProduccion): Inspeccion {
 const CalidadContext = createContext<CalidadState | null>(null)
 
 export function CalidadProvider({ children }: { children: ReactNode }) {
-  const { ordenes, ordenesConInspeccionPendiente, rechazarLote: appRechazarLote, crearAlerta } = useAppContext()
+  const { ordenes, ordenesConInspeccionPendiente, rechazarLote: appRechazarLote, resolverInspeccionPendiente, crearAlerta } = useAppContext()
 
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([])
   const [noConformidades, setNoConformidades] = useState<NoConformidad[]>([])
@@ -178,6 +178,10 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       .map(crearInspeccionDesdeOrden)
 
     setInspecciones((prev) => [...prev, ...nuevasInsp])
+    // Persistir inspecciones nuevas en Sheets para que sobrevivan un reload
+    nuevasInsp.forEach((ins) =>
+      pushASheets('inspecciones', 'POST', ins as unknown as Record<string, unknown>)
+    )
 
     const nuevosEventos: EventoTrazabilidad[] = nuevasInsp.map((ins) => ({
       id: `TR-${Date.now()}-${ins.id}`,
@@ -190,6 +194,9 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       modulo: 'CALIDAD',
     }))
     setTrazabilidad((prev) => [...prev, ...nuevosEventos])
+    nuevosEventos.forEach((ev) =>
+      pushASheets('trazabilidad', 'POST', ev as unknown as Record<string, unknown>)
+    )
   }, [ordenesConInspeccionPendiente])
 
   const aprobarInspeccion = useCallback(
@@ -215,6 +222,8 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       setTrazabilidad((prev) => [...prev, evento])
       pushASheets('trazabilidad', 'POST', evento as unknown as Record<string, unknown>)
 
+      resolverInspeccionPendiente(ins.ordenId)
+
       crearAlerta({
         tipo: 'INSPECCION_APROBADA',
         mensaje: `Lote ${ins.loteId} aprobado por Calidad`,
@@ -225,7 +234,7 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
         modulo: 'CALIDAD',
       })
     },
-    [inspecciones, crearAlerta]
+    [inspecciones, resolverInspeccionPendiente, crearAlerta]
   )
 
   const rechazarInspeccion = useCallback(
@@ -290,6 +299,7 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       setTrazabilidad((prev) => [...prev, ...eventosNuevos])
       eventosNuevos.forEach((ev) => pushASheets('trazabilidad', 'POST', ev as unknown as Record<string, unknown>))
 
+      resolverInspeccionPendiente(ins.ordenId)
       appRechazarLote(ins.loteId, ins.ordenId)
 
       crearAlerta({
@@ -302,7 +312,7 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
         modulo: 'CALIDAD',
       })
     },
-    [inspecciones, appRechazarLote, crearAlerta]
+    [inspecciones, resolverInspeccionPendiente, appRechazarLote, crearAlerta]
   )
 
   const cambiarInspector = useCallback((id: string, inspector: string) => {
