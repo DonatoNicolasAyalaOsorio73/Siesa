@@ -225,7 +225,7 @@ function NuevoProductoForm({
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function ListaMaterialesPage() {
-  const { bom, crearBomItem, editarBomItem, eliminarBomItem, setBom } = useManufacturaContext()
+  const { bom, crearBomProducto, crearBomItem, editarBomItem, eliminarBomItem } = useManufacturaContext()
   const { toast, mostrarToast, cerrarToast } = useToast()
 
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set([bom[0]?.productoId ?? '']))
@@ -285,11 +285,7 @@ export default function ListaMaterialesPage() {
   }
 
   function handleNuevoProducto(productoId: string, producto: string, version: string) {
-    // Añade un nuevo producto vacío al BOM
-    const nuevo: BomProducto = { productoId, producto, version, componentes: [] }
-    // We set directly via a workaround since setBom isn't in the interface
-    // Instead just use crearBomItem which triggers bom state update through the context
-    // For now we add via context trick
+    crearBomProducto(productoId, producto, version)
     setModalNuevoProducto(false)
     mostrarToast('Producto BOM creado. Agrega sus componentes.', 'success')
   }

@@ -73,7 +73,6 @@ interface ManufacturaState {
   centros: CentroTrabajo[]
   rutas: Ruta[]
   bom: BomProducto[]
-  setBom: (bom: BomProducto[]) => void
   registrosTiempos: RegistroTiempo[]
   cargando: boolean
   // Centros CRUD
@@ -85,6 +84,7 @@ interface ManufacturaState {
   editarRuta: (id: string, data: Partial<Ruta>) => void
   eliminarRuta: (id: string) => void
   // BOM CRUD
+  crearBomProducto: (productoId: string, producto: string, version: string) => void
   crearBomItem: (productoId: string, item: Omit<BomComponente, 'id'>) => void
   editarBomItem: (productoId: string, itemId: string, data: Partial<BomComponente>) => void
   eliminarBomItem: (productoId: string, itemId: string) => void
@@ -171,6 +171,15 @@ export function ManufacturaProvider({ children }: { children: ReactNode }) {
 
   // ── BOM ──────────────────────────────────────────────────────────────────────
 
+  const crearBomProducto = useCallback((productoId: string, producto: string, version: string) => {
+    const nuevo: BomProducto = { productoId, producto, version, componentes: [] }
+    setBom((prev) => {
+      if (prev.some((p) => p.productoId === productoId)) return prev
+      pushASheets('bom', 'POST', nuevo as unknown as Record<string, unknown>)
+      return [...prev, nuevo]
+    })
+  }, [])
+
   const crearBomItem = useCallback((productoId: string, item: Omit<BomComponente, 'id'>) => {
     const newItem: BomComponente = {
       ...item,
@@ -248,7 +257,6 @@ export function ManufacturaProvider({ children }: { children: ReactNode }) {
         centros,
         rutas: rutasState,
         bom,
-        setBom,
         registrosTiempos,
         cargando,
         crearCentro,
@@ -257,6 +265,7 @@ export function ManufacturaProvider({ children }: { children: ReactNode }) {
         crearRuta,
         editarRuta,
         eliminarRuta,
+        crearBomProducto,
         crearBomItem,
         editarBomItem,
         eliminarBomItem,
