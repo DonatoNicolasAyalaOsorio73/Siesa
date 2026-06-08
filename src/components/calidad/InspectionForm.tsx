@@ -6,6 +6,7 @@ import {
   Mic, MicOff, Sparkles, Bot, Loader2,
 } from 'lucide-react'
 import type { ResultadoParametro } from '@/context/CalidadContext'
+import { evaluarParametro } from '@/lib/calidad'
 
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
 
@@ -36,12 +37,7 @@ interface InspectionFormProps {
   onAnalisisIA?: (datos: { descripcion: string; accionInmediata: string; tipoDefecto: string }) => void
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-function evaluarParametro(medido: number, nominal: number, tolerancia: number): boolean | null {
-  if (isNaN(medido)) return null
-  return Math.abs(medido - nominal) <= tolerancia
-}
+// evaluarParametro se importa desde @/lib/calidad
 
 const SEVERIDAD_COLOR = {
   CRITICA: { bg: '#FDECEC', text: '#EF4444' },
@@ -62,12 +58,14 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   const [iaError, setIaError] = useState<string | null>(null)
   const [iaAplicado, setIaAplicado] = useState(false)
   const [dictando, setDictando] = useState(false)
+  const [textoInterino, setTextoInterino] = useState('')
   const [countdownIA, setCountdownIA] = useState<number | null>(null)
   const [speechDisponible] = useState(() => {
     if (typeof window === 'undefined') return false
     return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
   })
   const reconocimientoRef = useRef<any>(null)
+  const dictandoRef = useRef(false)
   const countdownIARef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Auto-reintento cuando hay CUOTA:N
@@ -131,28 +129,74 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   }
 
   // ── Web Speech API ──
-  function handleDictar() {
-    if (!speechDisponible) return
-    if (dictando) {
-      reconocimientoRef.current?.stop()
-      setDictando(false)
-      return
-    }
+  // iniciarReconocimiento se llama también desde onend para auto-reiniciar
+  // cuando Chrome para automáticamente por silencio (continuous=true no lo evita en Chrome).
+  const iniciarReconocimiento = useCallback(() => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const rec = new SpeechRec()
     rec.lang = 'es-CO'
-    rec.continuous = false
-    rec.interimResults = false
+    rec.continuous = true
+    rec.interimResults = true
+
     rec.onresult = (e: any) => {
-      const transcript = e.results[0][0].transcript
-      setMensajeOperario((prev) => (prev ? prev + ' ' + transcript : transcript))
+      let finalText = ''
+      let interino = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalText += e.results[i][0].transcript + ' '
+        } else {
+          interino += e.results[i][0].transcript
+        }
+      }
+      if (finalText.trim()) {
+        setMensajeOperario((prev) => (prev ? prev.trimEnd() + ' ' + finalText.trimEnd() : finalText.trimEnd()))
+        setTextoInterino('')
+      } else {
+        setTextoInterino(interino)
+      }
+    }
+
+    rec.onerror = (e: any) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        dictandoRef.current = false
+        setDictando(false)
+        setTextoInterino('')
+        setIaError('Permiso de micrófono denegado. Actívalo en la barra de dirección del navegador (ícono de candado o micrófono).')
+      }
+      // 'no-speech', 'audio-capture', 'network' → onend reiniciará si dictandoRef sigue en true
+    }
+
+    rec.onend = () => {
+      setTextoInterino('')
+      if (dictandoRef.current) {
+        // Chrome para automáticamente por silencio — reiniciamos para mantener el micrófono activo
+        try { iniciarReconocimiento() } catch { dictandoRef.current = false; setDictando(false) }
+      } else {
+        setDictando(false)
+      }
+    }
+
+    try {
+      rec.start()
+      reconocimientoRef.current = rec
+    } catch {
+      dictandoRef.current = false
       setDictando(false)
     }
-    rec.onerror = () => setDictando(false)
-    rec.onend = () => setDictando(false)
-    rec.start()
-    reconocimientoRef.current = rec
+  }, [setMensajeOperario, setIaError])
+
+  function handleDictar() {
+    if (!speechDisponible) return
+    if (dictandoRef.current) {
+      dictandoRef.current = false
+      reconocimientoRef.current?.stop()
+      setDictando(false)
+      setTextoInterino('')
+      return
+    }
+    dictandoRef.current = true
     setDictando(true)
+    iniciarReconocimiento()
   }
 
   // ── Llamada a la API de IA ──
@@ -227,6 +271,20 @@ export default function InspectionForm({ parametros, onResultadosChange, context
             className="w-full rounded-lg border border-[#E8EDF4] px-3 py-2.5 text-sm text-[#15233B] outline-none resize-none focus:border-[#6E56E0] focus:ring-1 focus:ring-[#6E56E0]/25 placeholder:text-[#D1D5DB] font-normal"
           />
 
+          {/* Indicador de texto en tiempo real */}
+          {dictando && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#EF4444]/8 border border-[#EF4444]/20">
+              <span className="inline-flex gap-[3px] items-end h-3">
+                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '0ms' }} />
+                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '70%', animationDelay: '150ms' }} />
+                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '300ms' }} />
+              </span>
+              <span className="text-xs text-[#DC2626] font-medium">
+                {textoInterino ? <em className="not-italic">{textoInterino}</em> : 'Escuchando…'}
+              </span>
+            </div>
+          )}
+
           {/* Botones */}
           <div className="flex items-center gap-2">
             {/* Dictar */}
@@ -236,7 +294,7 @@ export default function InspectionForm({ parametros, onResultadosChange, context
               title={speechDisponible ? (dictando ? 'Detener dictado' : 'Dictar defecto') : 'Dictado disponible en Chrome. Escribe el defecto manualmente.'}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                 dictando
-                  ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse'
+                  ? 'bg-[#EF4444] text-white border-[#EF4444]'
                   : speechDisponible
                   ? 'bg-white text-[#5A6B85] border-[#E8EDF4] hover:border-[#6E56E0] hover:text-[#6E56E0]'
                   : 'bg-[#F4F7FB] text-[#97A4B8] border-[#E8EDF4] cursor-not-allowed'
@@ -244,7 +302,7 @@ export default function InspectionForm({ parametros, onResultadosChange, context
               disabled={iaLoading}
             >
               {dictando ? <MicOff size={13} /> : <Mic size={13} />}
-              {dictando ? 'Grabando…' : 'Dictar'}
+              {dictando ? 'Detener' : 'Dictar'}
             </button>
 
             {/* Analizar */}

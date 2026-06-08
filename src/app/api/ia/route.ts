@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { parseJsonGemini } from '@/lib/gemini'
 
 // ─── CLIENTE GEMINI REST ──────────────────────────────────────────────────────
 // Prueba cada modelo en orden. Si un modelo devuelve 429 (cuota agotada),
 // continúa con el siguiente en lugar de fallar inmediatamente.
 // Solo lanza CUOTA: si TODOS los modelos están agotados.
 
-const MODELOS = [
-  'gemini-1.5-flash-8b',    // tier gratuito más generoso: 15 RPM, 1M tok/día
-  'gemini-1.5-flash',        // 15 RPM free tier
-  'gemini-1.5-flash-latest',
-  'gemini-2.0-flash-lite',   // 30 RPM free tier
-  'gemini-2.0-flash',        // más limitado en free tier
+type ModeloEntry = { id: string; apiVer: 'v1' | 'v1beta' }
+
+// Probados en orden: primero los de mayor cuota libre, distintas versiones de API
+// para maximizar chances de encontrar uno disponible.
+const MODELOS: ModeloEntry[] = [
+  { id: 'gemini-2.5-flash',         apiVer: 'v1beta' }, // cuota separada de 2.0
+  { id: 'gemini-2.5-flash-lite',    apiVer: 'v1beta' },
+  { id: 'gemini-2.0-flash-lite',    apiVer: 'v1beta' }, // 30 RPM
+  { id: 'gemini-2.0-flash',         apiVer: 'v1beta' }, // 15 RPM
+  { id: 'gemini-1.5-flash',         apiVer: 'v1' },     // v1 estable
+  { id: 'gemini-1.5-flash-8b',      apiVer: 'v1' },
+  { id: 'gemini-1.5-flash',         apiVer: 'v1beta' }, // fallback v1beta
+  { id: 'gemini-2.0-flash-lite',    apiVer: 'v1' },     // fallback v1
 ]
+
+// Tiempo mínimo de espera entre reintentos: el suficiente para que el
+// ventana de RPM se restablezca por completo (60s + margen de 5s).
+const RETRY_MIN_SEG = 65
 
 // Detecta si el cuerpo del error 429 indica limit:0 (proyecto sin cuota asignada)
 function esLimiteZero(errBody: any): boolean {
@@ -26,13 +38,13 @@ async function llamarGemini(prompt: string, maxTokens = 2048): Promise<string> {
   const key = process.env.GEMINI_API_KEY || ''
   if (!key) throw new Error('SIN_KEY')
 
-  let retrySegundos = 60
+  let retrySegundos = RETRY_MIN_SEG
   let algunaCuota = false
-  let cuotaCero = false   // limit:0 → proyecto sin cuota asignada (no es uso excesivo)
+  let cuotaCero = false
   let erroresRed = 0
 
-  for (const modelo of MODELOS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`
+  for (const { id, apiVer } of MODELOS) {
+    const url = `https://generativelanguage.googleapis.com/${apiVer}/models/${id}:generateContent?key=${key}`
     let res: Response
     try {
       res = await fetch(url, {
@@ -63,7 +75,9 @@ async function llamarGemini(prompt: string, maxTokens = 2048): Promise<string> {
         const retryInfo = body429?.error?.details?.find((d: any) => d.retryDelay)
         if (retryInfo?.retryDelay) {
           const seg = parseInt(retryInfo.retryDelay, 10)
-          if (seg > 0) retrySegundos = seg
+          // Nunca usar menos de RETRY_MIN_SEG — un valor corto (ej. 3s) solo
+          // indica el fin del ventana actual, no que toda la cuota se restablece.
+          if (seg > retrySegundos) retrySegundos = seg
         }
       } catch { /* ignorar */ }
       continue
@@ -78,7 +92,7 @@ async function llamarGemini(prompt: string, maxTokens = 2048): Promise<string> {
   }
 
   if (erroresRed === MODELOS.length) throw new Error('RED')
-  if (cuotaCero) throw new Error('CUOTA_CERO')   // project-level, no temporal
+  if (cuotaCero) throw new Error('CUOTA_CERO')
   if (algunaCuota) throw new Error(`CUOTA:${retrySegundos}`)
   throw new Error('SIN_MODELOS')
 }
@@ -95,13 +109,13 @@ async function llamarGeminiTexto(prompt: string, historial: {role: string, text:
     { role: 'user', parts: [{ text: prompt }] },
   ]
 
-  let retrySegundos = 60
+  let retrySegundos = RETRY_MIN_SEG
   let algunaCuota = false
   let cuotaCero = false
   let erroresRed = 0
 
-  for (const modelo of MODELOS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`
+  for (const { id, apiVer } of MODELOS) {
+    const url = `https://generativelanguage.googleapis.com/${apiVer}/models/${id}:generateContent?key=${key}`
     let res: Response
     try {
       res = await fetch(url, {
@@ -128,7 +142,7 @@ async function llamarGeminiTexto(prompt: string, historial: {role: string, text:
         const retryInfo = body429?.error?.details?.find((d: any) => d.retryDelay)
         if (retryInfo?.retryDelay) {
           const seg = parseInt(retryInfo.retryDelay, 10)
-          if (seg > 0) retrySegundos = seg
+          if (seg > retrySegundos) retrySegundos = seg
         }
       } catch { /* ignorar */ }
       continue
@@ -150,6 +164,7 @@ async function llamarGeminiTexto(prompt: string, historial: {role: string, text:
 
 function esFallback(err: Error) {
   return (
+    err instanceof SyntaxError ||   // JSON de Gemini malformado — usar mock silenciosamente
     err.message === 'RED' ||
     err.message === 'SIN_KEY' ||
     err.message === 'SIN_MODELOS' ||
@@ -160,6 +175,7 @@ function esFallback(err: Error) {
 }
 
 function razonFallback(err: Error): string {
+  if (err instanceof SyntaxError) return 'PARSE_ERROR'
   if (err.message === 'SIN_KEY') return 'SIN_KEY'
   if (err.message === 'CLAVE_INVALIDA') return 'CLAVE_INVALIDA'
   if (err.message === 'CUOTA_CERO') return 'CUOTA_CERO'
@@ -436,7 +452,7 @@ Reporte: "${mensaje}"`
 
     try {
       const texto = await llamarGemini(prompt, 512)
-      return NextResponse.json({ ok: true, clasificacion: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, clasificacion: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), clasificacion: mockClasificacion(mensaje) })
       return NextResponse.json({ ok: false, error: e.message })
@@ -465,7 +481,7 @@ No Conformidades: ${JSON.stringify(noConformidades)}`
 
     try {
       const texto = await llamarGemini(prompt, 2048)
-      return NextResponse.json({ ok: true, prediccion: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, prediccion: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), prediccion: mockPrediccion(ordenes, indicadores, noConformidades) })
       return NextResponse.json({ ok: false, error: e.message })
@@ -491,7 +507,7 @@ Criterios de priorización: 1) Órdenes ALTA prioridad primero, 2) Minimizar cam
 
     try {
       const texto = await llamarGemini(prompt, 1536)
-      return NextResponse.json({ ok: true, optimizacion: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, optimizacion: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), optimizacion: mockOptimizacion(ordenes) })
       return NextResponse.json({ ok: false, error: e.message })
@@ -517,7 +533,7 @@ No Conformidades: ${JSON.stringify(noConformidades)}`
 
     try {
       const texto = await llamarGemini(prompt, 1536)
-      return NextResponse.json({ ok: true, causas: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, causas: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), causas: mockCausas(noConformidades) })
       return NextResponse.json({ ok: false, error: e.message })
@@ -544,7 +560,7 @@ Registros de uso reciente: ${JSON.stringify(registrosTiempos.slice(0, 20))}`
 
     try {
       const texto = await llamarGemini(prompt, 2048)
-      return NextResponse.json({ ok: true, mantenimiento: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, mantenimiento: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), mantenimiento: mockMantenimiento(centros) })
       return NextResponse.json({ ok: false, error: e.message })
@@ -575,7 +591,7 @@ Centros (${centros?.length ?? 0}): ${JSON.stringify(centros?.map((c: any) => ({ 
 
     try {
       const texto = await llamarGemini(prompt, 3000)
-      return NextResponse.json({ ok: true, reporte: JSON.parse(texto) })
+      return NextResponse.json({ ok: true, reporte: parseJsonGemini(texto) })
     } catch (e: any) {
       if (esFallback(e)) return NextResponse.json({ ok: true, mock: true, razon: razonFallback(e), reporte: mockReporte({ ordenes, noConformidades, centros, indicadores }) })
       return NextResponse.json({ ok: false, error: e.message })

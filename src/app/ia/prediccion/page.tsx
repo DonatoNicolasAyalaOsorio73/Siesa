@@ -250,7 +250,11 @@ export default function PrediccionPage() {
             <div className="w-full max-w-lg flex flex-col gap-2 p-4 rounded-xl bg-[#FDECEC] border border-[#EF4444]/20 text-left">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle size={16} className="text-[#EF4444] flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-semibold text-[#DC2626]">Error de conexión con Gemini</p>
+                <p className="text-sm font-semibold text-[#DC2626]">
+                  {error.includes('JSON') || error.includes('string') || error.includes('position')
+                    ? 'Respuesta inválida de Gemini — reintentando…'
+                    : 'Error al ejecutar análisis'}
+                </p>
               </div>
               <p className="text-xs font-mono text-[#5A6B85] bg-white/70 rounded-lg p-2 border border-[#EF4444]/10 break-all">
                 {error}

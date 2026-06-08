@@ -1,19 +1,26 @@
 import { NextResponse } from 'next/server'
 
-const MODELOS = [
-  'gemini-1.5-flash-8b',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-latest',
-  'gemini-2.0-flash-lite',
-  'gemini-2.0-flash',
-]
+// IMPORTANTE: Este endpoint NO hace llamadas de generación.
+// Solo verifica la existencia del modelo vía GET (sin consumir cuota de tokens).
+// El estado de cuota se muestra cuando el usuario usa las features de IA.
+
+const MODELOS_TEST = [
+  { id: 'gemini-2.5-flash',      apiVer: 'v1beta' },
+  { id: 'gemini-2.5-flash-lite', apiVer: 'v1beta' },
+  { id: 'gemini-2.0-flash-lite', apiVer: 'v1beta' },
+  { id: 'gemini-2.0-flash',      apiVer: 'v1beta' },
+  { id: 'gemini-2.0-flash-lite', apiVer: 'v1'     },
+  { id: 'gemini-1.5-flash',      apiVer: 'v1'     },
+  { id: 'gemini-1.5-flash',      apiVer: 'v1beta' },
+  { id: 'gemini-1.5-flash-8b',   apiVer: 'v1'     },
+] as const
 
 export type ModeloEstado = {
   modelo: string
-  estado: 'OK' | 'CUOTA' | 'CUOTA_CERO' | 'NO_DISPONIBLE' | 'RED' | 'CLAVE_INVALIDA' | 'ERROR'
+  apiVer: string
+  estado: 'ACCESIBLE' | 'NO_DISPONIBLE' | 'CLAVE_INVALIDA' | 'RED' | 'ERROR'
   statusCode: number | null
   mensaje?: string
-  retrySegundos?: number
 }
 
 export async function GET() {
@@ -25,96 +32,64 @@ export async function GET() {
       error: 'SIN_KEY',
       hayModelo: false,
       keyPreview: '',
-      modelos: MODELOS.map((m) => ({
-        modelo: m, estado: 'NO_DISPONIBLE', statusCode: null, mensaje: 'Falta GEMINI_API_KEY',
+      modelos: MODELOS_TEST.map(({ id, apiVer }) => ({
+        modelo: id, apiVer, estado: 'NO_DISPONIBLE', statusCode: null, mensaje: 'Falta GEMINI_API_KEY',
       })),
     })
   }
 
   const resultados: ModeloEstado[] = []
+  // Deduplica: si ya encontramos un modelo accesible con mismo id, no reportar duplicados
+  const encontrados = new Set<string>()
 
-  for (const modelo of MODELOS) {
+  for (const { id, apiVer } of MODELOS_TEST) {
+    const clave = `${id}:${apiVer}`
+    if (encontrados.has(clave)) continue
+
     try {
-      // 1. Verificar si el modelo existe (no consume cuota de generación)
-      const infoRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelo}?key=${key}`,
-        { signal: AbortSignal.timeout(8000) }
+      // GET /models/{id} — verifica existencia SIN consumir cuota de generación
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/${apiVer}/models/${id}?key=${key}`,
+        { signal: AbortSignal.timeout(6000) }
       )
 
-      if (infoRes.status === 404) {
-        resultados.push({ modelo, estado: 'NO_DISPONIBLE', statusCode: 404, mensaje: 'Modelo no disponible o deprecado' })
-        continue
-      }
-
-      if (infoRes.status === 401 || infoRes.status === 403) {
-        resultados.push({ modelo, estado: 'CLAVE_INVALIDA', statusCode: infoRes.status, mensaje: 'API key inválida o sin permisos' })
-        continue
-      }
-
-      if (!infoRes.ok) {
-        resultados.push({ modelo, estado: 'ERROR', statusCode: infoRes.status, mensaje: `HTTP ${infoRes.status}` })
-        continue
-      }
-
-      // 2. El modelo existe — probar generación mínima para verificar cuota
-      const genRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'responde solo: ok' }] }],
-            generationConfig: { maxOutputTokens: 5, temperature: 0 },
-          }),
-          signal: AbortSignal.timeout(12000),
-        }
-      )
-
-      if (genRes.status === 200) {
-        resultados.push({ modelo, estado: 'OK', statusCode: 200 })
-      } else if (genRes.status === 429) {
-        let retrySegundos = 60
-        let esLimCero = false
-        try {
-          const err = await genRes.json()
-          const retryInfo = err?.error?.details?.find((d: any) => d.retryDelay)
-          if (retryInfo?.retryDelay) {
-            const seg = parseInt(retryInfo.retryDelay, 10)
-            if (seg > 0) retrySegundos = seg
-          }
-          const violations = err?.error?.details?.find((d: any) => d.violations)
-          esLimCero = violations?.violations?.some(
-            (v: any) => /limit:\s*0\b/i.test(v.description ?? '')
-          ) ?? false
-        } catch { /* ignorar */ }
-        if (esLimCero) {
-          resultados.push({ modelo, estado: 'CUOTA_CERO', statusCode: 429, mensaje: 'Proyecto sin cuota asignada (limit:0) — necesita API key de AI Studio' })
-        } else {
-          resultados.push({ modelo, estado: 'CUOTA', statusCode: 429, mensaje: `Cuota por minuto agotada — reintenta en ${retrySegundos}s`, retrySegundos })
-        }
-      } else if (genRes.status === 401 || genRes.status === 403) {
-        resultados.push({ modelo, estado: 'CLAVE_INVALIDA', statusCode: genRes.status, mensaje: 'Clave sin permisos de generación' })
+      if (res.status === 200) {
+        const info = await res.json().catch(() => ({}))
+        const displayName: string = info.displayName ?? id
+        resultados.push({
+          modelo: id,
+          apiVer,
+          estado: 'ACCESIBLE',
+          statusCode: 200,
+          mensaje: displayName,
+        })
+        encontrados.add(clave)
+      } else if (res.status === 404) {
+        resultados.push({ modelo: id, apiVer, estado: 'NO_DISPONIBLE', statusCode: 404, mensaje: `No existe en ${apiVer}` })
+        encontrados.add(clave)
+      } else if (res.status === 401 || res.status === 403) {
+        resultados.push({ modelo: id, apiVer, estado: 'CLAVE_INVALIDA', statusCode: res.status, mensaje: 'API key sin permisos' })
+        encontrados.add(clave)
       } else {
-        const body = await genRes.text().catch(() => '')
-        resultados.push({ modelo, estado: 'ERROR', statusCode: genRes.status, mensaje: body.slice(0, 200) })
+        resultados.push({ modelo: id, apiVer, estado: 'ERROR', statusCode: res.status, mensaje: `HTTP ${res.status}` })
+        encontrados.add(clave)
       }
     } catch {
-      resultados.push({ modelo, estado: 'RED', statusCode: null, mensaje: 'Sin respuesta del servidor de Google' })
+      resultados.push({ modelo: id, apiVer, estado: 'RED', statusCode: null, mensaje: 'Sin respuesta' })
+      encontrados.add(clave)
     }
   }
 
-  const hayModelo = resultados.some((r) => r.estado === 'OK')
-  const todasCuota = resultados.every((r) => ['CUOTA','CUOTA_CERO','NO_DISPONIBLE','RED'].includes(r.estado))
-  const claveInvalida = resultados.some((r) => r.estado === 'CLAVE_INVALIDA')
-  const cuotaCero = resultados.some((r) => r.estado === 'CUOTA_CERO')
+  const modelosAccesibles = resultados.filter(r => r.estado === 'ACCESIBLE')
+  const hayModelo = modelosAccesibles.length > 0
+  const claveInvalida = resultados.some(r => r.estado === 'CLAVE_INVALIDA')
 
   return NextResponse.json({
     ok: true,
     hayModelo,
-    todasCuota,
     claveInvalida,
-    cuotaCero,
     keyPreview: key.length > 12 ? `${key.slice(0, 8)}…${key.slice(-4)}` : '(corta)',
+    modelosAccesibles: modelosAccesibles.map(m => `${m.modelo} (${m.apiVer})`),
     modelos: resultados,
   })
 }
