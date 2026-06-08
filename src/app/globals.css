@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Figtree:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand blues */
+  --blue: #1F6CF0;
+  --blue-dark: #1557C9;
+  --sky: #4C9FE6;
+  --blue-50: #EAF2FE;
+  --blue-100: #D8E8FD;
+
+  /* Semantic */
+  --green: #16B364;
+  --green-50: #E7F8EF;
+  --green-100: #C3EDD5;
+  --violet: #6E56E0;
+  --violet-50: #EEEBFB;
+  --violet-100: #DDD8F5;
+  --amber: #F59E0B;
+  --amber-50: #FEF3E2;
+  --red: #EF4444;
+  --red-50: #FDECEC;
+
+  /* Neutrals */
+  --ink: #15233B;
+  --text: #5A6B85;
+  --muted: #97A4B8;
+  --bg: #F4F7FB;
+  --surface: #FFFFFF;
+  --border: #E8EDF4;
+  --border-2: #EEF2F8;
+
+  /* Legacy aliases kept for calidad/manufactura pages */
+  --siesa-primary: #1F6CF0;
+  --siesa-dark: #15233B;
+  --siesa-bg: #F4F7FB;
+  --siesa-surface: #FFFFFF;
+  --siesa-border: #E8EDF4;
+  --siesa-manufactura: #1F6CF0;
+  --siesa-calidad: #16B364;
+  --siesa-success: #16B364;
+  --siesa-warning: #F59E0B;
+  --siesa-danger: #EF4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Figtree', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3 {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CFDAE9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B3C2D8;
+}
