@@ -8,7 +8,7 @@ import {
   Factory, GitBranch, Settings, Package, DollarSign, Calculator,
   Clock, BarChart2, FlaskConical, FileText, Sliders, CheckCircle,
   RefreshCw, ClipboardCheck, AlertTriangle, TrendingUp,
-  LayoutDashboard, LogOut, X, Brain, Bot, Wrench, Zap,
+  LayoutDashboard, LogOut, X, Brain, Bot, Wrench, Zap, Activity,
 } from 'lucide-react'
 
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
@@ -230,6 +230,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <NavItemLink
             item={{ icon: Wrench, label: 'Mantenimiento IA', href: '/ia/mantenimiento', mod: 'ia' }}
             isActive={isActive('/ia/mantenimiento')}
+          />
+          <NavItemLink
+            item={{ icon: Activity, label: 'Estado de Modelos', href: '/ia/estado', mod: 'ia' }}
+            isActive={isActive('/ia/estado')}
           />
         </nav>
 

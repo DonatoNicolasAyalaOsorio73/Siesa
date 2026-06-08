@@ -13,12 +13,23 @@ const MODELOS = [
   'gemini-2.0-flash',        // más limitado en free tier
 ]
 
+// Detecta si el cuerpo del error 429 indica limit:0 (proyecto sin cuota asignada)
+function esLimiteZero(errBody: any): boolean {
+  const detalles = errBody?.error?.details ?? []
+  return detalles.some((d: any) =>
+    Array.isArray(d.violations) &&
+    d.violations.some((v: any) => /limit:\s*0\b/i.test(v.description ?? ''))
+  )
+}
+
 async function llamarGemini(prompt: string, maxTokens = 2048): Promise<string> {
   const key = process.env.GEMINI_API_KEY || ''
   if (!key) throw new Error('SIN_KEY')
 
   let retrySegundos = 60
-  let todosAgotados = true
+  let algunaCuota = false
+  let cuotaCero = false   // limit:0 → proyecto sin cuota asignada (no es uso excesivo)
+  let erroresRed = 0
 
   for (const modelo of MODELOS) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`
@@ -37,35 +48,39 @@ async function llamarGemini(prompt: string, maxTokens = 2048): Promise<string> {
         }),
       })
     } catch {
-      throw new Error('RED')
+      erroresRed++
+      continue
     }
 
-    if (res.status === 404) { todosAgotados = false; continue }
-
-    if (res.status === 429) {
-      // Este modelo agotado — anotar delay y probar el siguiente
-      try {
-        const err = await res.json()
-        const retryInfo = err?.error?.details?.find((d: any) => d.retryDelay)
-        if (retryInfo?.retryDelay) retrySegundos = parseInt(retryInfo.retryDelay, 10) || 60
-      } catch { /* ignorar */ }
-      continue  // ← clave: probar siguiente modelo, no lanzar error
-    }
-
+    if (res.status === 404) continue
     if (res.status === 401 || res.status === 403) throw new Error('CLAVE_INVALIDA')
 
-    if (!res.ok) {
-      const body = await res.text()
-      throw new Error(`API_ERROR:${res.status}:${body}`)
+    if (res.status === 429) {
+      algunaCuota = true
+      try {
+        const body429 = await res.json()
+        if (esLimiteZero(body429)) cuotaCero = true
+        const retryInfo = body429?.error?.details?.find((d: any) => d.retryDelay)
+        if (retryInfo?.retryDelay) {
+          const seg = parseInt(retryInfo.retryDelay, 10)
+          if (seg > 0) retrySegundos = seg
+        }
+      } catch { /* ignorar */ }
+      continue
     }
+
+    if (!res.ok) continue
 
     const data = await res.json()
     const texto: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    if (!texto) { todosAgotados = false; continue }
+    if (!texto) continue
     return texto
   }
 
-  throw new Error(todosAgotados ? `CUOTA:${retrySegundos}` : 'SIN_MODELOS')
+  if (erroresRed === MODELOS.length) throw new Error('RED')
+  if (cuotaCero) throw new Error('CUOTA_CERO')   // project-level, no temporal
+  if (algunaCuota) throw new Error(`CUOTA:${retrySegundos}`)
+  throw new Error('SIN_MODELOS')
 }
 
 async function llamarGeminiTexto(prompt: string, historial: {role: string, text: string}[], maxTokens = 1024): Promise<string> {
@@ -81,7 +96,9 @@ async function llamarGeminiTexto(prompt: string, historial: {role: string, text:
   ]
 
   let retrySegundos = 60
-  let todosAgotados = true
+  let algunaCuota = false
+  let cuotaCero = false
+  let erroresRed = 0
 
   for (const modelo of MODELOS) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`
@@ -96,30 +113,39 @@ async function llamarGeminiTexto(prompt: string, historial: {role: string, text:
         }),
       })
     } catch {
-      throw new Error('RED')
+      erroresRed++
+      continue
     }
 
-    if (res.status === 404) { todosAgotados = false; continue }
+    if (res.status === 404) continue
+    if (res.status === 401 || res.status === 403) throw new Error('CLAVE_INVALIDA')
 
     if (res.status === 429) {
+      algunaCuota = true
       try {
-        const err = await res.json()
-        const retryInfo = err?.error?.details?.find((d: any) => d.retryDelay)
-        if (retryInfo?.retryDelay) retrySegundos = parseInt(retryInfo.retryDelay, 10) || 60
+        const body429 = await res.json()
+        if (esLimiteZero(body429)) cuotaCero = true
+        const retryInfo = body429?.error?.details?.find((d: any) => d.retryDelay)
+        if (retryInfo?.retryDelay) {
+          const seg = parseInt(retryInfo.retryDelay, 10)
+          if (seg > 0) retrySegundos = seg
+        }
       } catch { /* ignorar */ }
-      continue  // ← probar siguiente modelo
+      continue
     }
 
-    if (res.status === 401 || res.status === 403) throw new Error('CLAVE_INVALIDA')
-    if (!res.ok) throw new Error('RED')
+    if (!res.ok) continue
 
     const data = await res.json()
     const texto: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    if (!texto) { todosAgotados = false; continue }
+    if (!texto) continue
     return texto
   }
 
-  throw new Error(todosAgotados ? `CUOTA:${retrySegundos}` : 'SIN_MODELOS')
+  if (erroresRed === MODELOS.length) throw new Error('RED')
+  if (cuotaCero) throw new Error('CUOTA_CERO')
+  if (algunaCuota) throw new Error(`CUOTA:${retrySegundos}`)
+  throw new Error('SIN_MODELOS')
 }
 
 function esFallback(err: Error) {
@@ -128,6 +154,7 @@ function esFallback(err: Error) {
     err.message === 'SIN_KEY' ||
     err.message === 'SIN_MODELOS' ||
     err.message === 'CLAVE_INVALIDA' ||
+    err.message === 'CUOTA_CERO' ||
     err.message.startsWith('CUOTA:')
   )
 }
@@ -135,7 +162,8 @@ function esFallback(err: Error) {
 function razonFallback(err: Error): string {
   if (err.message === 'SIN_KEY') return 'SIN_KEY'
   if (err.message === 'CLAVE_INVALIDA') return 'CLAVE_INVALIDA'
-  if (err.message.startsWith('CUOTA:')) return err.message  // "CUOTA:45"
+  if (err.message === 'CUOTA_CERO') return 'CUOTA_CERO'
+  if (err.message.startsWith('CUOTA:')) return err.message
   if (err.message === 'RED') return 'RED'
   if (err.message === 'SIN_MODELOS') return 'SIN_MODELOS'
   return 'ERROR'

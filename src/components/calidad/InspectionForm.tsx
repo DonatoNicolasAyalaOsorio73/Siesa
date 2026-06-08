@@ -74,7 +74,7 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   useEffect(() => {
     if (countdownIARef.current) clearInterval(countdownIARef.current)
     const razon = iaResultado?._razon
-    if (razon?.startsWith('CUOTA:') && !iaLoading) {
+    if (razon?.startsWith('CUOTA:') && razon !== 'CUOTA_CERO' && !iaLoading) {
       const seg = parseInt(razon.split(':')[1], 10) || 60
       setCountdownIA(seg)
       countdownIARef.current = setInterval(() => {
@@ -273,15 +273,30 @@ export default function InspectionForm({ parametros, onResultadosChange, context
             </div>
           )}
 
-          {/* Banner cuota agotada */}
-          {iaResultado?._razon?.startsWith('CUOTA:') && (
+          {/* Banner CUOTA_CERO — proyecto sin cuota asignada */}
+          {iaResultado?._razon === 'CUOTA_CERO' && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-[#FDECEC] border border-[#EF4444]/20 text-xs text-[#DC2626]">
+              <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>Proyecto sin cuota Gemini (limit:0)</strong> — la API key no tiene cuota gratuita asignada.
+                Crea una nueva key en{' '}
+                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline font-bold">
+                  aistudio.google.com/apikey
+                </a>{' '}
+                y pégala en <code className="bg-white/70 px-1 rounded">.env.local</code>.
+              </span>
+            </div>
+          )}
+
+          {/* Banner cuota por minuto agotada (temporal) */}
+          {iaResultado?._razon?.startsWith('CUOTA:') && iaResultado._razon !== 'CUOTA_CERO' && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3E2] border border-[#F59E0B]/20 text-xs text-[#D97706]">
               <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" />
               <span>
-                <strong>Cuota Gemini agotada</strong> —{' '}
+                <strong>Cuota por minuto agotada</strong> —{' '}
                 {countdownIA !== null
                   ? <>reintentando automáticamente en <strong>{countdownIA}s</strong>…</>
-                  : <>límite gratuito alcanzado. El análisis mostrado es local (aproximado).</>
+                  : <>límite temporal alcanzado. El análisis mostrado es local (aproximado).</>
                 }
               </span>
             </div>

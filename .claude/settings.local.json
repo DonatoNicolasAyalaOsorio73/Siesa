@@ -66,7 +66,9 @@
       "Bash(xargs grep -l \"modo.*optimizar\\\\|modo.*analizar\\\\|modo.*prediccion\\\\|modo.*asistente\")",
       "PowerShell($env:PATH -split ';' | Where-Object { $_ -match 'node' })",
       "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" --version 2>&1)",
-      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tsc --noEmit 2>&1 | Select-Object -First 80)"
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tsc --noEmit 2>&1 | Select-Object -First 80)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tsc --noEmit 2>&1 | Select-Object -First 40)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; Set-Location \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tsc --noEmit 2>&1 | Select-Object -First 30)"
     ]
   }
 }

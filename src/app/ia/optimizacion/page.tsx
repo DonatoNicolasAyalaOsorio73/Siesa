@@ -151,10 +151,10 @@ export default function OptimizacionIAPage() {
   const countdownOptRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownCausasRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Auto-reintento para optimización
+  // Auto-reintento para optimización (solo CUOTA temporal)
   useEffect(() => {
     if (countdownOptRef.current) clearInterval(countdownOptRef.current)
-    if (razonOpt?.startsWith('CUOTA:') && !loadingOpt) {
+    if (razonOpt?.startsWith('CUOTA:') && razonOpt !== 'CUOTA_CERO' && !loadingOpt) {
       const seg = parseInt(razonOpt.split(':')[1], 10) || 60
       setCountdownOpt(seg)
       countdownOptRef.current = setInterval(() => {
@@ -175,10 +175,10 @@ export default function OptimizacionIAPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [razonOpt])
 
-  // Auto-reintento para causas raíz
+  // Auto-reintento para causas raíz (solo CUOTA temporal)
   useEffect(() => {
     if (countdownCausasRef.current) clearInterval(countdownCausasRef.current)
-    if (razonCausas?.startsWith('CUOTA:') && !loadingCausas) {
+    if (razonCausas?.startsWith('CUOTA:') && razonCausas !== 'CUOTA_CERO' && !loadingCausas) {
       const seg = parseInt(razonCausas.split(':')[1], 10) || 60
       setCountdownCausas(seg)
       countdownCausasRef.current = setInterval(() => {
@@ -344,15 +344,27 @@ export default function OptimizacionIAPage() {
           {optimizacion && !loadingOpt && (
             <div className="space-y-5">
               {isMockOpt && (
-                <div className={`flex items-center gap-2 text-[11px] px-3 py-2 rounded-lg ${razonOpt?.startsWith('CUOTA:') ? 'bg-[#FEF3E2] text-[#D97706]' : razonOpt === 'SIN_KEY' ? 'bg-[#FDECEC] text-[#DC2626]' : 'bg-[#FEF3E2] text-[#D97706]'}`}>
-                  <AlertTriangle size={13} />
-                  {razonOpt?.startsWith('CUOTA:')
-                    ? countdownOpt !== null
-                      ? `Cuota Gemini agotada — reintentando automáticamente en ${countdownOpt}s…`
-                      : 'Cuota Gemini agotada — reintentando… Análisis generado localmente.'
-                    : razonOpt === 'SIN_KEY'
-                    ? 'Sin GEMINI_API_KEY — configura la clave en .env.local para IA real.'
-                    : 'Análisis offline — Gemini no disponible. Lógica local aplicada.'}
+                <div className={`flex items-start gap-2 text-[11px] px-3 py-2 rounded-lg ${
+                  razonOpt === 'SIN_KEY' || razonOpt === 'CLAVE_INVALIDA' || razonOpt === 'RED'
+                    ? 'bg-[#FDECEC] text-[#DC2626]'
+                    : 'bg-[#FEF3E2] text-[#D97706]'
+                }`}>
+                  <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" />
+                  <span>
+                    {razonOpt === 'SIN_KEY' && 'Sin GEMINI_API_KEY — configura la clave en .env.local.'}
+                    {razonOpt === 'CLAVE_INVALIDA' && 'Clave inválida — verifica GEMINI_API_KEY en .env.local.'}
+                    {razonOpt === 'RED' && <>Sin conexión a Gemini. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                    {razonOpt === 'SIN_MODELOS' && <>Sin modelos disponibles. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                    {razonOpt === 'CUOTA_CERO' && <>Proyecto sin cuota (limit:0) — obtén una key en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline font-bold">aistudio.google.com/apikey</a></>}
+                    {razonOpt?.startsWith('CUOTA:') && razonOpt !== 'CUOTA_CERO'
+                      ? countdownOpt !== null
+                        ? `Cuota agotada — reintentando en ${countdownOpt}s…`
+                        : <>Cuota por minuto agotada. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                      : null}
+                    {!razonOpt || (!['SIN_KEY','CLAVE_INVALIDA','RED','SIN_MODELOS','CUOTA_CERO'].includes(razonOpt) && !razonOpt.startsWith('CUOTA:'))
+                      ? <>IA no disponible. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                      : null}
+                  </span>
                 </div>
               )}
 
@@ -465,15 +477,27 @@ export default function OptimizacionIAPage() {
           {causas && !loadingCausas && (
             <div className="space-y-5">
               {isMockCausas && (
-                <div className={`flex items-center gap-2 text-[11px] px-3 py-2 rounded-lg ${razonCausas?.startsWith('CUOTA:') ? 'bg-[#FEF3E2] text-[#D97706]' : razonCausas === 'SIN_KEY' ? 'bg-[#FDECEC] text-[#DC2626]' : 'bg-[#FEF3E2] text-[#D97706]'}`}>
-                  <AlertTriangle size={13} />
-                  {razonCausas?.startsWith('CUOTA:')
-                    ? countdownCausas !== null
-                      ? `Cuota Gemini agotada — reintentando automáticamente en ${countdownCausas}s…`
-                      : 'Cuota Gemini agotada — reintentando… Análisis generado localmente.'
-                    : razonCausas === 'SIN_KEY'
-                    ? 'Sin GEMINI_API_KEY — configura la clave en .env.local para IA real.'
-                    : 'Análisis offline — Gemini no disponible. Lógica local aplicada.'}
+                <div className={`flex items-start gap-2 text-[11px] px-3 py-2 rounded-lg ${
+                  razonCausas === 'SIN_KEY' || razonCausas === 'CLAVE_INVALIDA' || razonCausas === 'RED'
+                    ? 'bg-[#FDECEC] text-[#DC2626]'
+                    : 'bg-[#FEF3E2] text-[#D97706]'
+                }`}>
+                  <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" />
+                  <span>
+                    {razonCausas === 'SIN_KEY' && 'Sin GEMINI_API_KEY — configura la clave en .env.local.'}
+                    {razonCausas === 'CLAVE_INVALIDA' && 'Clave inválida — verifica GEMINI_API_KEY en .env.local.'}
+                    {razonCausas === 'RED' && <>Sin conexión a Gemini. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                    {razonCausas === 'SIN_MODELOS' && <>Sin modelos disponibles. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                    {razonCausas === 'CUOTA_CERO' && <>Proyecto sin cuota (limit:0) — obtén una key en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline font-bold">aistudio.google.com/apikey</a></>}
+                    {razonCausas?.startsWith('CUOTA:') && razonCausas !== 'CUOTA_CERO'
+                      ? countdownCausas !== null
+                        ? `Cuota agotada — reintentando en ${countdownCausas}s…`
+                        : <>Cuota por minuto agotada. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                      : null}
+                    {!razonCausas || (!['SIN_KEY','CLAVE_INVALIDA','RED','SIN_MODELOS','CUOTA_CERO'].includes(razonCausas) && !razonCausas.startsWith('CUOTA:'))
+                      ? <>IA no disponible. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                      : null}
+                  </span>
                 </div>
               )}
 

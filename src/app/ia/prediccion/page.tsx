@@ -121,10 +121,10 @@ export default function PrediccionPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Auto-reintento cuando countdown llega a 0
+  // Auto-reintento cuando countdown llega a 0 (solo para CUOTA temporal, no CUOTA_CERO)
   useEffect(() => {
     if (countdownRef.current) clearInterval(countdownRef.current)
-    if (razonMock?.startsWith('CUOTA:') && !loading) {
+    if (razonMock?.startsWith('CUOTA:') && razonMock !== 'CUOTA_CERO' && !loading) {
       const seg = parseInt(razonMock.split(':')[1], 10) || 60
       setCountdown(seg)
       countdownRef.current = setInterval(() => {
@@ -300,18 +300,29 @@ export default function PrediccionPage() {
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${
                 razonMock === 'SIN_KEY' || razonMock === 'CLAVE_INVALIDA'
                   ? 'bg-[#FDECEC] text-[#DC2626]'
+                  : razonMock === 'RED'
+                  ? 'bg-[#FDECEC] text-[#DC2626]'
                   : 'bg-[#FEF3E2] text-[#D97706]'
               }`}>
                 <AlertTriangle size={12} />
                 <span>
-                  {razonMock === 'SIN_KEY' && <><strong>Sin API Key</strong> — configura GEMINI_API_KEY en .env.local.</>}
-                  {razonMock === 'CLAVE_INVALIDA' && <><strong>Clave Gemini inválida</strong> — verifica GEMINI_API_KEY en .env.local.</>}
-                  {razonMock?.startsWith('CUOTA:') && (
-                    countdown !== null
-                      ? <><strong>Cuota agotada</strong> — reintentando automáticamente en <strong>{countdown}s</strong>… Análisis local activo.</>
-                      : <><strong>Cuota agotada</strong> — límite gratuito de Gemini alcanzado. Reintentando… Análisis generado con lógica local.</>
+                  {razonMock === 'SIN_KEY' && <><strong>Sin API Key</strong> — agrega GEMINI_API_KEY en .env.local.</>}
+                  {razonMock === 'CLAVE_INVALIDA' && <><strong>Clave inválida</strong> — verifica GEMINI_API_KEY en .env.local.</>}
+                  {razonMock === 'RED' && <><strong>Sin conexión a Gemini</strong> — revisa acceso a internet. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                  {razonMock === 'SIN_MODELOS' && <><strong>Sin modelos disponibles</strong>. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>}
+                  {razonMock === 'CUOTA_CERO' && (
+                    <><strong>Proyecto sin cuota Gemini (limit:0)</strong> — la API key usada no tiene cuota gratuita asignada. Ve a{' '}
+                    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline font-bold">aistudio.google.com/apikey</a>
+                    , crea una nueva key y pégala en <code className="bg-white/40 px-1 rounded">.env.local</code>.</>
                   )}
-                  {(!razonMock || razonMock === 'RED') && <><strong>Modo offline</strong> — Análisis generado con lógica local basada en los datos reales.</>}
+                  {razonMock?.startsWith('CUOTA:') && razonMock !== 'CUOTA_CERO' && (
+                    countdown !== null
+                      ? <><strong>Cuota agotada</strong> — reintentando en <strong>{countdown}s</strong>…</>
+                      : <><strong>Cuota agotada</strong> — límite por minuto alcanzado. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                  )}
+                  {(!razonMock || (razonMock !== 'SIN_KEY' && razonMock !== 'CLAVE_INVALIDA' && razonMock !== 'RED' && razonMock !== 'SIN_MODELOS' && razonMock !== 'CUOTA_CERO' && !razonMock.startsWith('CUOTA:'))) && (
+                    <><strong>IA no disponible</strong> — análisis local activo. <a href="/ia/estado" className="underline">Ver diagnóstico</a></>
+                  )}
                 </span>
               </div>
             ) : (
