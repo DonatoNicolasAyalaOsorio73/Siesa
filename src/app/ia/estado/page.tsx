@@ -259,7 +259,7 @@ export default function EstadoIAPage() {
                 </p>
                 {estado.hayModelo && (
                   <p className="text-xs text-[#5A6B85] mt-1">
-                    Si ves "cuota agotada" al usar la IA, el sistema espera 65s y reintenta automáticamente con otro modelo.
+                    Si ves &quot;cuota agotada&quot; al usar la IA, el sistema espera 65s y reintenta automáticamente con otro modelo.
                   </p>
                 )}
               </div>
@@ -325,7 +325,7 @@ export default function EstadoIAPage() {
             Pasos para activar la IA
           </p>
           <div className="space-y-2 text-xs text-[#5A6B85]">
-            <p><strong className="text-[#15233B]">1. Obtén una API key de AI Studio:</strong> Ve a <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline text-[#6E56E0] font-semibold">aistudio.google.com/apikey</a> → "Create API key"</p>
+            <p><strong className="text-[#15233B]">1. Obtén una API key de AI Studio:</strong> Ve a <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" className="underline text-[#6E56E0] font-semibold">aistudio.google.com/apikey</a> → &quot;Create API key&quot;</p>
             <p><strong className="text-[#15233B]">2. Actualiza .env.local:</strong> <code className="bg-[#F4F7FB] px-1.5 py-0.5 rounded">GEMINI_API_KEY=AIzaSy...tu-key</code></p>
             <p><strong className="text-[#15233B]">3. Reinicia el servidor:</strong> <code className="bg-[#F4F7FB] px-1.5 py-0.5 rounded">npm run dev</code></p>
             <p><strong className="text-[#15233B]">4. Vuelve a ejecutar el diagnóstico</strong> para verificar.</p>
