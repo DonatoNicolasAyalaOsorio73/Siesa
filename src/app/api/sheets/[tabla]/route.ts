@@ -4,7 +4,6 @@ import {
   agregarFila,
   actualizarFila,
   eliminarFila,
-  inicializarHoja,
 } from '@/lib/googleSheets'
 
 // ─── CREDENCIALES CONFIGURADAS ────────────────────────────────────────────────
@@ -83,12 +82,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!cols) return NextResponse.json({ error: `Tabla desconocida: ${tabla}` }, { status: 400 })
   if (!sheetsConfigurado()) return NextResponse.json([])
   try {
-    await inicializarHoja(tabla, cols)
     const data = await leerHoja(tabla)
     return NextResponse.json(data)
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error(`[Sheets GET ${tabla}]`, msg)
+    return NextResponse.json([], { status: 200 })
   }
 }
 

@@ -1,10 +1,13 @@
 'use client'
 
+import { useMemo } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
-import { estructuraCostos, formatCOPCurrency } from '@/data/manufacturaData'
+import { formatCOPCurrency } from '@/data/manufacturaData'
+import { useAppContext } from '@/context/AppContext'
+import { useManufacturaContext } from '@/context/ManufacturaContext'
 import PageHeader from '@/components/manufactura/PageHeader'
 import { TrendingDown, TrendingUp, DollarSign } from 'lucide-react'
 
@@ -44,6 +47,26 @@ function TooltipPersonalizado({
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function EstructuraCostosPage() {
+  const { ordenes } = useAppContext()
+  const { rutas, bom } = useManufacturaContext()
+
+  const estructuraCostos = useMemo(() => ordenes
+    .filter((o) => o.cantidadPlanificada > 0)
+    .map((o) => {
+      const ruta = rutas.find((r) => r.id === o.rutaId)
+      const bomItem = bom.find((b) => b.productoId === o.fichaTecnicaId)
+      const costoMatUnit = bomItem?.componentes.reduce((s, c) => s + c.costoUnitario * c.cantidad, 0) ?? 0
+      const materiales = Math.round(costoMatUnit * o.cantidadPlanificada)
+      const tiempoTotalHr = (ruta?.operaciones.reduce((s, op) => s + op.tiempoOperacionMin + op.tiempoSetupMin, 0) ?? 0) / 60
+      const manoObra = Math.round(tiempoTotalHr * (ruta?.costoManoObraHora ?? 35000) * o.cantidadPlanificada)
+      const cif = Math.round((manoObra + materiales) * 0.25)
+      const totalEstimado = manoObra + materiales + cif
+      const totalReal = o.cantidadProducida > 0
+        ? Math.round(totalEstimado * o.cantidadProducida / o.cantidadPlanificada)
+        : 0
+      return { ordenId: o.id, producto: o.producto, manoObra, materiales, cif, totalEstimado, totalReal }
+    }), [ordenes, rutas, bom])
+
   const datoGrafico = estructuraCostos.map((c) => ({
     orden: c.ordenId.replace('OP-2024-', 'OP-'),
     Estimado: c.totalEstimado,

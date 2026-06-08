@@ -108,6 +108,23 @@ function OrdenCard({ orden }: { orden: OrdenCriticaIA }) {
 
 export default function PrediccionPage() {
   const { ordenes, prediccionIA, setPrediccionIA } = useAppContext()
+  const { inspecciones } = useCalidadContext()
+
+  const fpyPorLinea = useMemo(() => {
+    const lineas = Array.from(new Set(ordenes.map((o) => o.lineaProduccion))).sort()
+    return lineas.map((linea) => {
+      const ol = ordenes.filter((o) => o.lineaProduccion === linea)
+      const producido = ol.reduce((s, o) => s + o.cantidadProducida, 0)
+      const rechazado = ol.reduce((s, o) => s + o.cantidadRechazada, 0)
+      const fpy = producido > 0 ? parseFloat(((producido - rechazado) / producido * 100).toFixed(1)) : 0
+      const insLinea = inspecciones.filter((i) => ol.some((o) => o.id === i.ordenId))
+      const tiempoEsperaProm = insLinea.length > 0
+        ? Math.round(insLinea.reduce((s, i) => s + tiempoEsperaMin(i), 0) / insLinea.length)
+        : 0
+      return { linea, fpyHoy: fpy, fpySemana: fpy, defectosPorMillon: Math.round(producido > 0 ? rechazado / producido * 1_000_000 : 0), tiempoEsperaProm }
+    })
+  }, [ordenes, inspecciones])
+
   const [loading, setLoading] = useState(false)
   const [mensajeCargaIdx, setMensajeCargaIdx] = useState(0)
   const [error, setError] = useState<string | null>(null)

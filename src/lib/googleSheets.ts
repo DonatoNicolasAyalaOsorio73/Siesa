@@ -33,8 +33,9 @@ function rowsToObjects(rows: string[][]): Record<string, unknown>[] {
     headers.forEach((h, i) => {
       const val = row[i] ?? ''
       if (val === '') { obj[h] = null; return }
-      if (val === 'true') { obj[h] = true; return }
-      if (val === 'false') { obj[h] = false; return }
+      const vLow = val.toLowerCase()
+      if (vLow === 'true') { obj[h] = true; return }
+      if (vLow === 'false') { obj[h] = false; return }
       if (val.startsWith('{') || val.startsWith('[')) {
         try { obj[h] = JSON.parse(val); return } catch { /* keep as string */ }
       }

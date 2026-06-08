@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
   BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
@@ -10,8 +10,8 @@ import {
 import { formatDistance } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useAppContext } from '@/context/AppContext'
-import { centrosTrabajo } from '@/data/mockData'
-import { fpyPorLinea, tendenciaTiempoEspera } from '@/data/calidadData'
+import { useManufacturaContext } from '@/context/ManufacturaContext'
+import { useCalidadContext, tiempoEsperaMin } from '@/context/CalidadContext'
 import type { Alerta, PrediccionIA } from '@/context/AppContext'
 import {
   Factory, ClipboardCheck, TrendingUp, Bell, AlertTriangle,
@@ -131,6 +131,32 @@ function LabelPie({ cx, cy, midAngle, outerRadius, name, value, payload }: any) 
 // ─── PANEL FPY + ÁREA ─────────────────────────────────────────────────────────
 
 function PanelGraficas() {
+  const { ordenes } = useAppContext()
+  const { inspecciones } = useCalidadContext()
+
+  const fpyPorLinea = useMemo(() => {
+    const lineas = Array.from(new Set(ordenes.map((o) => o.lineaProduccion))).sort()
+    return lineas.map((linea) => {
+      const ol = ordenes.filter((o) => o.lineaProduccion === linea)
+      const producido = ol.reduce((s, o) => s + o.cantidadProducida, 0)
+      const rechazado = ol.reduce((s, o) => s + o.cantidadRechazada, 0)
+      const fpy = producido > 0 ? parseFloat(((producido - rechazado) / producido * 100).toFixed(1)) : 0
+      return { linea, fpyHoy: fpy, fpySemana: fpy }
+    })
+  }, [ordenes])
+
+  const tendenciaTiempoEspera = useMemo(() => {
+    const horas = Array.from({ length: 12 }, (_, i) => `${String(i + 6).padStart(2, '0')}:00`)
+    return horas.map((hora) => {
+      const h = parseInt(hora)
+      const ins = inspecciones.filter((i) => new Date(i.fechaDisparo).getHours() === h)
+      const minutos = ins.length > 0
+        ? Math.round(ins.reduce((s, i) => s + tiempoEsperaMin(i), 0) / ins.length)
+        : 0
+      return { hora, minutos }
+    })
+  }, [inspecciones])
+
   const fpyData = fpyPorLinea.map(f => ({
     linea: f.linea.replace('Línea ', 'L.'),
     'FPY Hoy': f.fpyHoy,
@@ -183,6 +209,7 @@ function PanelGraficas() {
 // ─── PANEL CENTROS DE TRABAJO ─────────────────────────────────────────────────
 
 function PanelCentros() {
+  const { centros: centrosTrabajo } = useManufacturaContext()
   const operativos = centrosTrabajo.filter(c => c.estado === 'OPERATIVO')
   const capacidadGlobal = operativos.length > 0
     ? Math.round(operativos.reduce((s, c) => s + c.eficiencia, 0) / operativos.length * 100)

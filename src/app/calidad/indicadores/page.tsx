@@ -50,7 +50,7 @@ export default function IndicadoresPage() {
   const { ordenes } = useAppContext()
 
   const fpyPorLinea = useMemo(() => {
-    const lineas = [...new Set(ordenes.map((o) => o.lineaProduccion))].sort()
+    const lineas = Array.from(new Set(ordenes.map((o) => o.lineaProduccion))).sort()
     return lineas.map((linea) => {
       const ol = ordenes.filter((o) => o.lineaProduccion === linea)
       const producido = ol.reduce((s, o) => s + o.cantidadProducida, 0)

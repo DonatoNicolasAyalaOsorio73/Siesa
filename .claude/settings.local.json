@@ -55,7 +55,11 @@
       "PowerShell(Start-Sleep -Seconds 8; Invoke-RestMethod \"http://localhost:3000/api/sheets/status\" | ConvertTo-Json)",
       "PowerShell($env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" run build 2>&1 | Select-Object -Last 60)",
       "PowerShell(Start-Sleep -Seconds 4; try { $r = Invoke-RestMethod \"http://localhost:3000/api/sheets/status\"; $r | ConvertTo-Json } catch { \"Servidor no disponible: $_\" })",
-      "PowerShell($env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" run build 2>&1 | Where-Object { $_ -match \"error|Error|compiled|pages\" } | Select-Object -First 20)"
+      "PowerShell($env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; cd \"C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa\"; & \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" run build 2>&1 | Where-Object { $_ -match \"error|Error|compiled|pages\" } | Select-Object -First 20)",
+      "Bash(npx next *)",
+      "PowerShell(cd C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa; $env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; node --version; npx --version)",
+      "PowerShell(cd C:\\\\Users\\\\donat\\\\Desktop\\\\Siesa; $env:PATH += \";$env:APPDATA\\\\npm;C:\\\\Program Files\\\\nodejs\"; npx next build 2>&1 | Select-Object -Last 80)",
+      "Bash(node *)"
     ]
   }
 }
