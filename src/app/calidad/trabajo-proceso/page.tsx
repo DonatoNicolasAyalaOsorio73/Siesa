@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { RefreshCw, AlertTriangle, CheckCircle2, Clock, Settings, User, Activity, XCircle } from 'lucide-react'
 import { useAppContext } from '@/context/AppContext'
 import { useCalidadContext } from '@/context/CalidadContext'
@@ -75,10 +75,12 @@ function BadgeCalidad({ item }: { item: OrdenConCalidad }) {
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function TrabajoProcesoCPage() {
-  const { ordenes, ordenesConInspeccionPendiente, completarOperacion } = useAppContext()
-  const { inspecciones, noConformidades } = useCalidadContext()
+  const { ordenes, ordenesConInspeccionPendiente, completarOperacion, cargando } = useAppContext()
+  const { inspecciones, noConformidades, cargando: cargandoCalidad } = useCalidadContext()
   const [filtroEstado, setFiltroEstado] = useState<'TODOS' | OrdenProduccion['estado']>('TODOS')
   const [seleccionada, setSeleccionada] = useState<OrdenConCalidad | null>(null)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Solo órdenes activas (no COMPLETADA) que requieren inspección.
   // Las COMPLETADA ya pasaron a Entregas de Producto Terminado.
@@ -126,6 +128,28 @@ export default function TrabajoProcesoCPage() {
   const pendientes = ordenesConCalidad.filter((e) => e.orden.estado === 'PENDIENTE').length
   const detenidas = ordenesConCalidad.filter((e) => e.orden.estado === 'DETENIDA').length
   const conNC = ordenesConCalidad.filter((e) => e.ncAbiertas > 0).length
+
+  const cargandoTodo = !mounted || cargando || cargandoCalidad
+
+  if (cargandoTodo) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <PageHeader titulo="Trabajo en Proceso" subtitulo="Vista integrada Manufactura + Calidad — todas las órdenes activas con su estado de calidad" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-[#E8EDF4] shadow-sm p-4 h-20 animate-pulse">
+              <div className="h-4 bg-[#F4F7FB] rounded w-1/2 mb-2" />
+              <div className="h-6 bg-[#F4F7FB] rounded w-1/3" />
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-2xl border border-[#E8EDF4] p-8 text-center">
+          <RefreshCw size={28} className="mx-auto mb-3 text-[#97A4B8] animate-spin" />
+          <p className="text-sm text-[#5A6B85]">Cargando órdenes desde Sheets…</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -245,9 +269,9 @@ export default function TrabajoProcesoCPage() {
                     <td className="px-5 py-4 text-[#5A6B85]">
                       <div className="flex items-center gap-1.5">
                         <Settings size={11} className="text-[#97A4B8] shrink-0" />
-                        <span>{orden.operacionActual.nombre}</span>
+                        <span>{orden.operacionActual?.nombre ?? '—'}</span>
                         <span className="text-[#97A4B8]">
-                          ({orden.operacionActual.indice}/{orden.operacionActual.total})
+                          ({orden.operacionActual?.indice ?? 0}/{orden.operacionActual?.total ?? 1})
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mt-0.5 text-[#97A4B8]">
@@ -326,7 +350,7 @@ export default function TrabajoProcesoCPage() {
               <p className="text-[10px] text-[#97A4B8] uppercase tracking-wide mb-3">Manufactura</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: 'Operación actual', value: seleccionada.orden.operacionActual.nombre },
+                  { label: 'Operación actual', value: seleccionada.orden.operacionActual?.nombre ?? '—' },
                   { label: 'Operario', value: seleccionada.orden.operario },
                   { label: 'Producidas', value: `${new Intl.NumberFormat('es-CO').format(seleccionada.orden.cantidadProducida)} und` },
                   { label: 'Rechazadas', value: `${seleccionada.orden.cantidadRechazada} und` },
