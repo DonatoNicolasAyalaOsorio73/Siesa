@@ -3,157 +3,244 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Siesa MES — Assessment de Desarrollo con IA</title>
+<title>Siesa MES — Assessment IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /* ── TOKENS SIESA EXACTOS ─────────────────────────────────── */
   :root {
-    --blue:   #1F6CF0;
-    --blue-d: #1450BE;
-    --green:  #16B364;
-    --purple: #7C3AED;
-    --amber:  #F59E0B;
-    --red:    #EF4444;
-    --dark:   #0F1E35;
-    --body:   #15233B;
-    --muted:  #5A6B85;
-    --faint:  #97A4B8;
-    --border: #E2E8F3;
-    --bg:     #F4F7FB;
-    --white:  #FFFFFF;
+    --ink:      #15233B;
+    --blue:     #1F6CF0;
+    --blue-d:   #1557C9;
+    --blue-50:  #EAF2FE;
+    --blue-100: #D8E8FD;
+    --green:    #16B364;
+    --green-50: #E7F8EF;
+    --violet:   #6E56E0;
+    --violet-50:#EEEBFB;
+    --amber:    #F59E0B;
+    --amber-50: #FEF3E2;
+    --red:      #EF4444;
+    --red-50:   #FDECEC;
+    --text:     #5A6B85;
+    --muted:    #97A4B8;
+    --bg:       #F4F7FB;
+    --surface:  #FFFFFF;
+    --border:   #E8EDF4;
   }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
-    background: var(--bg); color: var(--body);
+    font-family: 'Figtree', -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--ink);
     min-height: 100vh; line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── LAYOUT ── */
-  .wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 72px; }
-
-  /* ── HERO ── */
-  .hero {
-    background: linear-gradient(145deg, #0F1E35 0%, #1450BE 55%, #1F6CF0 100%);
-    border-radius: 24px; padding: 52px 48px 48px; margin-bottom: 40px;
-    color: white; position: relative; overflow: hidden;
+  /* ── TOPBAR — igual al sidebar de Siesa ────────────────────── */
+  .topbar {
+    background: var(--ink);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(255,255,255,.06);
   }
-  .hero::before {
-    content: ''; position: absolute; top: -60px; right: -60px;
-    width: 320px; height: 320px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%);
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .siesa-logo { display: flex; align-items: center; gap: 0; }
+  .siesa-logo svg { width: 32px; height: 32px; }
+  .topbar-brand { margin-left: 10px; }
+  .topbar-brand-name {
+    font-size: 17px; font-weight: 800; color: #fff;
+    letter-spacing: -.3px; line-height: 1;
+  }
+  .topbar-brand-sub {
+    font-size: 9.5px; color: rgba(255,255,255,.4);
+    letter-spacing: .12em; text-transform: uppercase; margin-top: 2px;
+  }
+  .topbar-sep {
+    width: 1px; height: 28px; background: rgba(255,255,255,.1); margin: 0 18px;
+  }
+  .topbar-section {
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,.45);
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .topbar-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(22,179,100,.15); border: 1px solid rgba(22,179,100,.3);
+    color: #6EE7B7; font-size: 11px; font-weight: 700;
+    padding: 5px 12px; border-radius: 99px; letter-spacing: .03em;
+  }
+  .topbar-badge::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  /* ── LAYOUT ─────────────────────────────────────────────────── */
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  /* ── HERO ─────────────────────────────────────────────────────
+     Replica el estilo de la sección de cabecera de las páginas
+     internas de Siesa (bg blanco, borde inferior, sin gradient)
+  ─────────────────────────────────────────────────────────────── */
+  .hero {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 20px; overflow: hidden; margin-bottom: 32px;
+  }
+  .hero-top {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a3260 100%);
+    padding: 40px 44px 36px; position: relative; overflow: hidden;
+  }
+  .hero-top::after {
+    content: ''; position: absolute; right: -80px; top: -80px;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(31,108,240,.18) 0%, transparent 65%);
     pointer-events: none;
   }
-  .hero-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 28px; }
-  .brand-row { display: flex; align-items: center; gap: 14px; }
-  .brand-icon { width: 44px; height: 44px; flex-shrink: 0; }
-  .brand-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
-  .brand-sub { font-size: 10px; color: rgba(255,255,255,.5); letter-spacing: .12em; text-transform: uppercase; margin-top: 1px; }
-  .hero-badge {
-    background: rgba(22,179,100,.2); border: 1px solid rgba(22,179,100,.4);
-    color: #6EE7B7; font-size: 11px; font-weight: 700; padding: 5px 12px;
-    border-radius: 99px; display: flex; align-items: center; gap: 6px; letter-spacing: .03em;
+  .hero-top::before {
+    content: ''; position: absolute; left: 50%; bottom: -40px;
+    transform: translateX(-50%);
+    width: 600px; height: 80px; border-radius: 50%;
+    background: rgba(31,108,240,.07); pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,.45);
+    letter-spacing: .15em; text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before { content: ''; width: 18px; height: 2px; background: var(--blue); border-radius: 1px; }
+  .hero-h1 { font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -.5px; line-height: 1.15; margin-bottom: 12px; }
+  .hero-h1 em { color: #93C5FD; font-style: normal; }
+  .hero-desc {
+    font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.7;
+    max-width: 540px; margin-bottom: 30px;
+  }
+
+  /* chips tipo Siesa */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 10px; padding: 8px 14px; font-size: 12px; color: rgba(255,255,255,.85);
+    font-weight: 500;
+  }
+  .chip-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
     flex-shrink: 0;
   }
-  .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #34D399; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .chip-icon-blue   { background: rgba(31,108,240,.35); }
+  .chip-icon-green  { background: rgba(22,179,100,.35); }
+  .chip-icon-violet { background: rgba(110,86,224,.35); }
+  .chip-icon-amber  { background: rgba(245,158,11,.35); }
+  .chip strong { font-weight: 800; color: #fff; margin-right: 2px; }
 
-  .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -.6px; line-height: 1.15; margin-bottom: 12px; }
-  .hero h1 span { color: #93C5FD; }
-  .hero-desc { font-size: 14.5px; color: rgba(255,255,255,.72); line-height: 1.65; margin-bottom: 32px; max-width: 560px; }
-
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 600px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
-  .kpi {
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    border-radius: 12px; padding: 14px 16px;
+  /* KPI row bajo el hero */
+  .hero-kpi {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border-top: 1px solid var(--border);
   }
-  .kpi-val { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-  .kpi-label { font-size: 11px; color: rgba(255,255,255,.55); font-weight: 500; }
+  @media(max-width:580px){ .hero-kpi { grid-template-columns: repeat(2,1fr); } }
+  .kpi-cell {
+    padding: 20px 24px; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .kpi-cell:last-child { border-right: none; }
+  .kpi-val { font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1; }
+  .kpi-val.blue   { color: var(--blue); }
+  .kpi-val.green  { color: var(--green); }
+  .kpi-val.violet { color: var(--violet); }
+  .kpi-val.amber  { color: var(--amber); }
+  .kpi-label { font-size: 11px; color: var(--muted); font-weight: 500; }
 
-  /* ── SECTION LABEL ── */
-  .sec { margin-bottom: 32px; }
+  /* ── SECTION LABEL — estilo Siesa ───────────────────────────── */
+  .sec { margin-bottom: 28px; }
   .sec-label {
     font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--faint); margin-bottom: 14px; padding-left: 2px;
-    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); margin-bottom: 12px; padding-left: 2px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-label-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
   }
   .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* ── SUMMARY BOX ── */
-  .summary {
-    background: white; border: 1.5px solid var(--border); border-radius: 18px;
-    padding: 28px 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-  }
-  @media (max-width: 560px) { .summary { grid-template-columns: 1fr; } }
-  .sum-block h3 { font-size: 12px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
-  .sum-block p { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
-  .sum-block strong { color: var(--body); }
+  /* ── CLAUDE TOOLS — bloque de 3 ─────────────────────────────── */
+  .claude-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  @media(max-width:600px){ .claude-row { grid-template-columns: 1fr; } }
 
-  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
-  .tag {
-    font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 7px;
-    border: 1px solid transparent;
+  .claude-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 20px 20px 18px; overflow: hidden;
+    position: relative;
   }
-  .tag-blue   { background: #EAF2FE; color: var(--blue);   border-color: #C7DFFC; }
-  .tag-green  { background: #E7F8EF; color: var(--green);  border-color: #BAF0D5; }
-  .tag-purple { background: #F0EBFF; color: var(--purple); border-color: #DDD0FF; }
-  .tag-amber  { background: #FEF3E2; color: var(--amber);  border-color: #FDE08D; }
-  .tag-dark   { background: #F1F3F8; color: var(--body);   border-color: #D8DFE9; }
+  .claude-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .claude-card.c-blue::before   { background: linear-gradient(90deg, var(--blue), #4C9FE6); }
+  .claude-card.c-violet::before { background: linear-gradient(90deg, var(--violet), #A78BFA); }
+  .claude-card.c-green::before  { background: linear-gradient(90deg, var(--green), #34D399); }
 
-  /* ── LOGROS ── */
-  .logros { background: white; border: 1.5px solid var(--border); border-radius: 18px; padding: 24px 28px; }
-  .logros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 560px) { .logros-grid { grid-template-columns: 1fr; } }
-  .logro {
-    display: flex; align-items: flex-start; gap: 12px;
-    background: var(--bg); border-radius: 12px; padding: 14px 16px;
+  .claude-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .claude-ico {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
-  .logro-icon {
-    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 15px;
-  }
-  .logro-text strong { font-size: 12.5px; font-weight: 700; color: var(--body); display: block; margin-bottom: 2px; }
-  .logro-text span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+  .ico-blue   { background: var(--blue-50); }
+  .ico-violet { background: var(--violet-50); }
+  .ico-green  { background: var(--green-50); }
 
-  /* ── CARDS ── */
+  .claude-tool { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .claude-tool.blue   { color: var(--blue); }
+  .claude-tool.violet { color: var(--violet); }
+  .claude-tool.green  { color: var(--green); }
+  .claude-name { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .claude-desc { font-size: 12px; color: var(--text); line-height: 1.6; }
+
+  /* ── CARDS DE LINKS ──────────────────────────────────────────── */
   .cards { display: grid; gap: 10px; }
   .cards-2 { grid-template-columns: 1fr 1fr; }
-  @media (max-width: 540px) { .cards-2 { grid-template-columns: 1fr; } }
+  @media(max-width:540px){ .cards-2 { grid-template-columns: 1fr; } }
 
   .card {
-    background: white; border: 1.5px solid var(--border); border-radius: 16px;
-    padding: 20px 22px; display: flex; align-items: flex-start; gap: 16px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 18px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
     text-decoration: none; color: inherit;
-    transition: border-color .15s, box-shadow .16s, transform .13s;
+    transition: border-color .14s, box-shadow .14s, transform .12s;
   }
-  .card:hover { border-color: var(--blue); box-shadow: 0 6px 24px rgba(31,108,240,.11); transform: translateY(-2px); }
-  .card.cv-green:hover  { border-color: var(--green);  box-shadow: 0 6px 24px rgba(22,179,100,.11); }
-  .card.cv-purple:hover { border-color: var(--purple); box-shadow: 0 6px 24px rgba(124,58,237,.11); }
-  .card.cv-amber:hover  { border-color: var(--amber);  box-shadow: 0 6px 24px rgba(245,158,11,.11); }
-  .card.cv-red:hover    { border-color: var(--red);    box-shadow: 0 6px 24px rgba(239,68,68,.11); }
+  .card:hover { transform: translateY(-2px); }
+  .card.v-blue:hover   { border-color: var(--blue);   box-shadow: 0 6px 22px rgba(31,108,240,.12); }
+  .card.v-green:hover  { border-color: var(--green);  box-shadow: 0 6px 22px rgba(22,179,100,.12); }
+  .card.v-violet:hover { border-color: var(--violet); box-shadow: 0 6px 22px rgba(110,86,224,.12); }
+  .card.v-amber:hover  { border-color: var(--amber);  box-shadow: 0 6px 22px rgba(245,158,11,.12); }
+  .card.v-red:hover    { border-color: var(--red);    box-shadow: 0 6px 22px rgba(239,68,68,.12); }
+  .card.v-ink:hover    { border-color: var(--ink);    box-shadow: 0 6px 22px rgba(21,35,59,.10); }
 
   .ci {
-    width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 21px;
   }
-  .ci-blue   { background: #EAF2FE; }
-  .ci-green  { background: #E7F8EF; }
-  .ci-purple { background: #F0EBFF; }
-  .ci-amber  { background: #FEF3E2; }
-  .ci-red    { background: #FDECEC; }
+  .ci-blue   { background: var(--blue-50); }
+  .ci-green  { background: var(--green-50); }
+  .ci-violet { background: var(--violet-50); }
+  .ci-amber  { background: var(--amber-50); }
+  .ci-red    { background: var(--red-50); }
   .ci-gray   { background: #F1F3F8; }
 
   .cb { flex: 1; min-width: 0; }
-  .cb-title { font-size: 14px; font-weight: 700; color: var(--body); margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-  .cb-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .cb-title {
+    font-size: 13.5px; font-weight: 700; color: var(--ink);
+    margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  }
+  .cb-desc { font-size: 12px; color: var(--text); line-height: 1.6; }
   .cb-url {
-    display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600;
-    color: var(--faint); font-family: 'SF Mono', 'Courier New', monospace;
+    display: inline-block; margin-top: 7px; font-size: 10.5px; font-weight: 600;
+    color: var(--muted); font-family: 'SF Mono','Courier New',monospace;
     background: var(--bg); padding: 3px 9px; border-radius: 6px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
   }
@@ -161,196 +248,220 @@
   .arr {
     flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px;
     background: var(--bg); display: flex; align-items: center; justify-content: center;
-    font-size: 13px; color: var(--faint); align-self: center;
-    transition: background .15s, color .15s, transform .15s;
+    font-size: 13px; color: var(--muted); align-self: center;
+    transition: background .14s, color .14s, transform .14s;
   }
-  .card:hover .arr { background: var(--blue); color: white; transform: translateX(2px); }
-  .card.cv-green:hover  .arr { background: var(--green); }
-  .card.cv-purple:hover .arr { background: var(--purple); }
-  .card.cv-amber:hover  .arr { background: var(--amber); }
-  .card.cv-red:hover    .arr { background: var(--red); }
+  .card.v-blue:hover   .arr { background: var(--blue);   color: #fff; transform: translateX(2px); }
+  .card.v-green:hover  .arr { background: var(--green);  color: #fff; transform: translateX(2px); }
+  .card.v-violet:hover .arr { background: var(--violet); color: #fff; transform: translateX(2px); }
+  .card.v-amber:hover  .arr { background: var(--amber);  color: #fff; transform: translateX(2px); }
+  .card.v-red:hover    .arr { background: var(--red);    color: #fff; transform: translateX(2px); }
+  .card.v-ink:hover    .arr { background: var(--ink);    color: #fff; transform: translateX(2px); }
 
-  /* ── BADGE INLINE ── */
+  /* badge inline */
   .bdg {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; padding: 2px 8px;
-    border-radius: 99px; letter-spacing: .02em;
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
   }
-  .bdg-green  { background: #E7F8EF; color: var(--green); }
-  .bdg-blue   { background: #EAF2FE; color: var(--blue); }
-  .bdg-purple { background: #F0EBFF; color: var(--purple); }
-  .bdg-live::before { content: '●'; font-size: 7px; }
+  .bdg-green  { background: var(--green-50);  color: var(--green); }
+  .bdg-blue   { background: var(--blue-50);   color: var(--blue); }
+  .bdg-violet { background: var(--violet-50); color: var(--violet); }
+  .bdg-live::before { content: '●'; font-size: 7px; margin-right: 2px; }
 
-  /* ── FOOTER ── */
-  .footer {
-    text-align: center; font-size: 12px; color: var(--faint);
-    padding-top: 32px; border-top: 1px solid var(--border); margin-top: 8px;
-    line-height: 1.8;
+  /* ── LOGROS ──────────────────────────────────────────────────── */
+  .logros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:540px){ .logros-grid { grid-template-columns: 1fr; } }
+  .logro {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
   }
-  .footer a { color: var(--faint); text-decoration: none; font-weight: 600; }
-  .footer a:hover { color: var(--blue); }
-  .footer strong { color: var(--muted); }
+  .logro-ico {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .logro-text strong { font-size: 12px; font-weight: 700; color: var(--ink); display: block; margin-bottom: 2px; }
+  .logro-text span   { font-size: 11.5px; color: var(--text); line-height: 1.5; }
+
+  /* ── STACK TABLE ─────────────────────────────────────────────── */
+  .stack-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 6px 12px;
+    border-radius: 9px; border: 1.5px solid transparent;
+  }
+  .stag-blue   { background: var(--blue-50);   color: var(--blue);   border-color: var(--blue-100); }
+  .stag-green  { background: var(--green-50);  color: var(--green);  border-color: #BAF0D5; }
+  .stag-violet { background: var(--violet-50); color: var(--violet); border-color: #DDD0FF; }
+  .stag-amber  { background: var(--amber-50);  color: var(--amber);  border-color: #FDE08D; }
+  .stag-gray   { background: #F1F3F8; color: var(--ink); border-color: #D8DFE9; }
+  .stag-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── INFO BOX ────────────────────────────────────────────────── */
+  .info-box {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 18px; padding: 26px 28px;
+  }
+  .info-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width:560px){ .info-2col { grid-template-columns: 1fr; } }
+  .info-block h3 {
+    font-size: 10px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px;
+  }
+  .info-block p { font-size: 13px; color: var(--text); line-height: 1.65; }
+  .info-block p strong { color: var(--ink); font-weight: 700; }
+  .info-block + .info-block { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 4px; }
+
+  /* ── FOOTER ──────────────────────────────────────────────────── */
+  .footer {
+    margin-top: 12px; padding-top: 28px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-left { display: flex; align-items: center; gap: 10px; }
+  .footer-left svg { width: 28px; height: 28px; opacity: .5; }
+  .footer-brand { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .footer-sub { font-size: 11px; color: var(--muted); }
+  .footer-right { font-size: 11.5px; color: var(--muted); text-align: right; line-height: 1.7; }
+  .footer-right a { color: var(--muted); text-decoration: none; font-weight: 600; }
+  .footer-right a:hover { color: var(--blue); }
 </style>
 </head>
 <body>
+
+<!-- ── TOPBAR SIESA ─────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="siesa-logo">
+      <svg viewBox="0 0 100 100" fill="none" width="32" height="32">
+        <path d="M0 0 L50 0 L0 50 Z" fill="#1F6CF0"/>
+        <path d="M50 50 L100 0 L100 50 Z" fill="#1F6CF0"/>
+        <path d="M0 50 L50 50 L0 100 Z" fill="#1F6CF0"/>
+        <path d="M50 100 L100 50 L100 100 Z" fill="#1F6CF0"/>
+      </svg>
+      <div class="topbar-brand">
+        <div class="topbar-brand-name">SIESA</div>
+        <div class="topbar-brand-sub">MES · Manufacturing Execution System</div>
+      </div>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-section">Assessment de Desarrollo con IA</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-badge">Prototipo en producción</div>
+  </div>
+</header>
+
 <div class="wrap">
 
-  <!-- ── HERO ── -->
+  <!-- ── HERO ───────────────────────────────────────────────────── -->
   <div class="hero">
     <div class="hero-top">
-      <div class="brand-row">
-        <svg class="brand-icon" viewBox="0 0 100 100" fill="none">
-          <path d="M0 0 L50 0 L0 50 Z" fill="#fff"/>
-          <path d="M50 50 L100 0 L100 50 Z" fill="#fff"/>
-          <path d="M0 50 L50 50 L0 100 Z" fill="#fff"/>
-          <path d="M50 100 L100 50 L100 100 Z" fill="#fff"/>
-        </svg>
-        <div>
-          <div class="brand-name">Siesa MES</div>
-          <div class="brand-sub">Manufacturing Execution System</div>
+      <div class="hero-eyebrow">Assessment de Desarrollo · Junio 2026</div>
+      <div class="hero-h1">Módulo MES construido<br>con <em>Inteligencia Artificial</em></div>
+      <p class="hero-desc">
+        Sistema completo de Manufacturing Execution diseñado, programado y documentado
+        íntegramente mediante herramientas de IA de Anthropic — desde la arquitectura
+        hasta el deploy en producción, en menos de 3 días.
+      </p>
+      <div class="chip-row">
+        <div class="chip">
+          <div class="chip-icon chip-icon-blue">✦</div>
+          <span><strong>Claude Design</strong> — Diseño UI/UX</span>
+        </div>
+        <div class="chip">
+          <div class="chip-icon chip-icon-violet">⌨</div>
+          <span><strong>Claude Code</strong> — Desarrollo</span>
+        </div>
+        <div class="chip">
+          <div class="chip-icon chip-icon-green">🤖</div>
+          <span><strong>Claude AI</strong> — 86 prompts</span>
+        </div>
+        <div class="chip">
+          <div class="chip-icon chip-icon-amber">▲</div>
+          <span><strong>Vercel</strong> — Deploy</span>
         </div>
       </div>
-      <div class="hero-badge">En producción · Vercel</div>
     </div>
-
-    <h1>Assessment de Desarrollo<br><span>Asistido por Inteligencia Artificial</span></h1>
-    <p class="hero-desc">
-      Prototipo funcional de módulo ERP/MES para planta de manufactura de autopartes —
-      desarrollado íntegramente mediante prompting con Claude AI. Incluye módulos de
-      Manufactura, Calidad, análisis predictivo y base de datos en tiempo real.
-    </p>
-
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="kpi-val">86</div>
+    <div class="hero-kpi">
+      <div class="kpi-cell">
+        <div class="kpi-val blue">86</div>
         <div class="kpi-label">Prompts con IA</div>
       </div>
-      <div class="kpi">
-        <div class="kpi-val">3 días</div>
-        <div class="kpi-label">Tiempo de desarrollo</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-val">14+</div>
+      <div class="kpi-cell">
+        <div class="kpi-val green">14+</div>
         <div class="kpi-label">Módulos funcionales</div>
       </div>
-      <div class="kpi">
-        <div class="kpi-val">112</div>
+      <div class="kpi-cell">
+        <div class="kpi-val violet">112</div>
         <div class="kpi-label">Tests automatizados</div>
       </div>
+      <div class="kpi-cell">
+        <div class="kpi-val amber">3 días</div>
+        <div class="kpi-label">Tiempo de desarrollo</div>
+      </div>
     </div>
   </div>
 
-  <!-- ── RESUMEN DEL PROYECTO ── -->
+  <!-- ── HERRAMIENTAS CLAUDE ────────────────────────────────────── -->
   <div class="sec">
-    <div class="sec-label">Sobre el proyecto</div>
-    <div class="summary">
-      <div class="sum-block">
-        <h3>Contexto</h3>
-        <p>
-          Prototipo de <strong>sistema MES</strong> basado en la suite ERP de
-          <strong>Siesa</strong> (empresa colombiana líder en software empresarial),
-          diseñado para plantas de manufactura de autopartes. Cubre el flujo completo
-          desde órdenes de producción hasta liberación de lotes por calidad.
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--violet)"></span>
+      Herramientas Anthropic utilizadas
+    </div>
+    <div class="claude-row">
+      <div class="claude-card c-blue">
+        <div class="claude-head">
+          <div class="claude-ico ico-blue">✦</div>
+          <div>
+            <div class="claude-tool blue">Diseño visual</div>
+            <div class="claude-name">Claude Design</div>
+          </div>
+        </div>
+        <p class="claude-desc">
+          Todo el UI/UX del prototipo fue concebido y especificado con Claude Design —
+          sistema de colores Siesa, componentes, layout del sidebar, cards,
+          tablas y flujos de navegación.
         </p>
       </div>
-      <div class="sum-block">
-        <h3>Stack tecnológico</h3>
-        <div class="tag-list">
-          <span class="tag tag-blue">Next.js 14</span>
-          <span class="tag tag-blue">TypeScript</span>
-          <span class="tag tag-blue">React 18</span>
-          <span class="tag tag-green">Google Sheets API</span>
-          <span class="tag tag-purple">Claude AI</span>
-          <span class="tag tag-purple">Gemini Flash</span>
-          <span class="tag tag-amber">Tailwind CSS</span>
-          <span class="tag tag-amber">Recharts</span>
-          <span class="tag tag-dark">Vercel</span>
-          <span class="tag tag-dark">Jest</span>
+      <div class="claude-card c-violet">
+        <div class="claude-head">
+          <div class="claude-ico ico-violet">⌨</div>
+          <div>
+            <div class="claude-tool violet">Programación</div>
+            <div class="claude-name">Claude Code</div>
+          </div>
         </div>
-      </div>
-      <div class="sum-block">
-        <h3>Metodología</h3>
-        <p>
-          Desarrollo <strong>100% asistido por IA</strong> mediante prompting estructurado.
-          Cada módulo fue definido con requerimientos funcionales precisos y construido
-          iterativamente. Base de datos persistente en <strong>Google Sheets</strong>,
-          desplegado en producción en Vercel.
+        <p class="claude-desc">
+          El código fuente completo — Next.js 14, TypeScript, contextos React,
+          integración con Sheets API, tests Jest y configuración de Vercel —
+          fue generado y refinado con Claude Code.
         </p>
       </div>
-      <div class="sum-block">
-        <h3>Módulos implementados</h3>
-        <div class="tag-list">
-          <span class="tag tag-blue">Órdenes producción</span>
-          <span class="tag tag-blue">Rutas</span>
-          <span class="tag tag-blue">Centros de trabajo</span>
-          <span class="tag tag-blue">BOM / Materiales</span>
-          <span class="tag tag-green">Inspecciones</span>
-          <span class="tag tag-green">No conformidades</span>
-          <span class="tag tag-green">Trazabilidad</span>
-          <span class="tag tag-green">Muestreo</span>
-          <span class="tag tag-purple">Predicción IA</span>
-          <span class="tag tag-purple">Análisis defectos</span>
+      <div class="claude-card c-green">
+        <div class="claude-head">
+          <div class="claude-ico ico-green">🤖</div>
+          <div>
+            <div class="claude-tool green">Prompting / IA</div>
+            <div class="claude-name">Claude AI</div>
+          </div>
         </div>
+        <p class="claude-desc">
+          86 prompts de dirección, iteración y corrección enviados a Claude AI para
+          definir requerimientos, depurar errores, conectar módulos e integrar
+          análisis predictivo con Gemini Flash.
+        </p>
       </div>
     </div>
   </div>
 
-  <!-- ── LOGROS ── -->
+  <!-- ── PROTOTIPO LIVE ─────────────────────────────────────────── -->
   <div class="sec">
-    <div class="sec-label">Logros técnicos destacados</div>
-    <div class="logros">
-      <div class="logros-grid">
-        <div class="logro">
-          <div class="logro-icon ci-blue">⚡</div>
-          <div class="logro-text">
-            <strong>Arquitectura de contextos React</strong>
-            <span>3 contextos globales (App, Manufactura, Calidad) con sincronización en tiempo real contra Google Sheets</span>
-          </div>
-        </div>
-        <div class="logro">
-          <div class="logro-icon ci-green">🔗</div>
-          <div class="logro-text">
-            <strong>Flujo manufactura → calidad</strong>
-            <span>Al completar una operación se dispara automáticamente una inspección en el módulo de calidad</span>
-          </div>
-        </div>
-        <div class="logro">
-          <div class="logro-icon ci-purple">🤖</div>
-          <div class="logro-text">
-            <strong>IA integrada end-to-end</strong>
-            <span>Análisis de defectos por voz, predicción de riesgos de producción y análisis de NCs con Gemini AI</span>
-          </div>
-        </div>
-        <div class="logro">
-          <div class="logro-icon ci-amber">🔔</div>
-          <div class="logro-text">
-            <strong>Sistema de notificaciones</strong>
-            <span>Alertas sintéticas en memoria para datos históricos sin contaminar la base de datos</span>
-          </div>
-        </div>
-        <div class="logro">
-          <div class="logro-icon ci-green">📊</div>
-          <div class="logro-text">
-            <strong>Trazabilidad completa</strong>
-            <span>Timeline de eventos por lote con síntesis automática de historial para datos pre-existentes</span>
-          </div>
-        </div>
-        <div class="logro">
-          <div class="logro-icon ci-blue">✅</div>
-          <div class="logro-text">
-            <strong>112 tests automatizados</strong>
-            <span>Suite Jest con 6 archivos de tests cubriendo flujos de manufactura, calidad y ciclos de Sheets</span>
-          </div>
-        </div>
-      </div>
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--green)"></span>
+      Entregable principal
     </div>
-  </div>
-
-  <!-- ── PROTOTIPO ── -->
-  <div class="sec">
-    <div class="sec-label">Entregable principal</div>
     <div class="cards">
-      <a href="https://siesa.vercel.app/" target="_blank" rel="noopener" class="card">
+      <a href="https://siesa.vercel.app/" target="_blank" rel="noopener" class="card v-blue">
         <div class="ci ci-blue">🖥️</div>
         <div class="cb">
           <div class="cb-title">
@@ -358,8 +469,9 @@
             <span class="bdg bdg-green bdg-live">En producción</span>
           </div>
           <div class="cb-desc">
-            Aplicación web completa con 14 módulos funcionales — manufactura, calidad, IA predictiva,
-            notificaciones y trazabilidad. Base de datos live en Google Sheets.
+            Aplicación web completa con módulos de Manufactura, Calidad e Inteligencia Artificial.
+            Órdenes, inspecciones, no conformidades, trazabilidad, muestreo y análisis predictivo —
+            todo conectado a Google Sheets en tiempo real.
           </div>
           <span class="cb-url">siesa.vercel.app</span>
         </div>
@@ -368,28 +480,114 @@
     </div>
   </div>
 
-  <!-- ── DOCUMENTACIÓN ── -->
+  <!-- ── SOBRE EL PROYECTO ─────────────────────────────────────── -->
   <div class="sec">
-    <div class="sec-label">Documentación del proceso</div>
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--blue)"></span>
+      Sobre el proyecto
+    </div>
+    <div class="info-box">
+      <div class="info-2col">
+        <div class="info-block">
+          <h3>Contexto</h3>
+          <p>
+            Prototipo de <strong>sistema MES</strong> basado en la suite ERP de
+            <strong>Siesa</strong> (empresa colombiana líder), diseñado para
+            planta de autopartes. Cubre el flujo completo desde órdenes de
+            producción hasta liberación de lotes por calidad.
+          </p>
+        </div>
+        <div class="info-block">
+          <h3>Stack tecnológico</h3>
+          <div class="stack-grid">
+            <span class="stag stag-blue"><span class="stag-dot"></span>Next.js 14</span>
+            <span class="stag stag-blue"><span class="stag-dot"></span>TypeScript</span>
+            <span class="stag stag-blue"><span class="stag-dot"></span>React 18</span>
+            <span class="stag stag-green"><span class="stag-dot"></span>Google Sheets API</span>
+            <span class="stag stag-violet"><span class="stag-dot"></span>Claude AI</span>
+            <span class="stag stag-violet"><span class="stag-dot"></span>Gemini Flash</span>
+            <span class="stag stag-amber"><span class="stag-dot"></span>Tailwind CSS</span>
+            <span class="stag stag-gray"><span class="stag-dot"></span>Jest</span>
+            <span class="stag stag-gray"><span class="stag-dot"></span>Vercel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LOGROS ─────────────────────────────────────────────────── -->
+  <div class="sec">
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--amber)"></span>
+      Logros técnicos destacados
+    </div>
+    <div class="logros-grid">
+      <div class="logro">
+        <div class="logro-ico ci-blue">⚡</div>
+        <div class="logro-text">
+          <strong>Arquitectura de contextos React</strong>
+          <span>3 contextos globales (App, Manufactura, Calidad) sincronizados con Google Sheets en tiempo real</span>
+        </div>
+      </div>
+      <div class="logro">
+        <div class="logro-ico ci-green">🔗</div>
+        <div class="logro-text">
+          <strong>Flujo manufactura → calidad</strong>
+          <span>Al completar una operación se dispara automáticamente una inspección en calidad</span>
+        </div>
+      </div>
+      <div class="logro">
+        <div class="logro-ico ci-violet">🤖</div>
+        <div class="logro-text">
+          <strong>IA integrada end-to-end</strong>
+          <span>Análisis de defectos por voz, predicción de riesgos y clasificación de NCs con Gemini AI</span>
+        </div>
+      </div>
+      <div class="logro">
+        <div class="logro-ico ci-amber">🔔</div>
+        <div class="logro-text">
+          <strong>Sistema de notificaciones</strong>
+          <span>Alertas sintéticas en memoria para datos históricos sin contaminar la base de datos</span>
+        </div>
+      </div>
+      <div class="logro">
+        <div class="logro-ico ci-green">📊</div>
+        <div class="logro-text">
+          <strong>Trazabilidad completa de lotes</strong>
+          <span>Timeline de eventos con síntesis automática de historial para datos pre-existentes</span>
+        </div>
+      </div>
+      <div class="logro">
+        <div class="logro-ico ci-blue">✅</div>
+        <div class="logro-text">
+          <strong>112 tests automatizados</strong>
+          <span>Suite Jest con 6 archivos cubriendo flujos de manufactura, calidad y ciclos Sheets</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DOCUMENTACIÓN ─────────────────────────────────────────── -->
+  <div class="sec">
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--amber)"></span>
+      Documentación del proceso
+    </div>
     <div class="cards cards-2">
-      <a href="https://siesa.vercel.app/conversacion-siesa-mes.html" target="_blank" rel="noopener" class="card cv-amber">
+      <a href="https://siesa.vercel.app/conversacion-siesa-mes.html" target="_blank" rel="noopener" class="card v-amber">
         <div class="ci ci-amber">📜</div>
         <div class="cb">
           <div class="cb-title">Historial Completo de Prompts</div>
-          <div class="cb-desc">
-            Los 86 prompts enviados a Claude AI durante el desarrollo, en orden cronológico.
-          </div>
+          <div class="cb-desc">Los 86 prompts enviados a Claude AI durante el desarrollo, en orden cronológico.</div>
           <span class="cb-url">conversacion-siesa-mes.html</span>
         </div>
         <div class="arr">→</div>
       </a>
-      <a href="https://www.loom.com/share/a342bd0719684785a9cd502f747704e0" target="_blank" rel="noopener" class="card cv-red">
+      <a href="https://www.loom.com/share/a342bd0719684785a9cd502f747704e0" target="_blank" rel="noopener" class="card v-red">
         <div class="ci ci-red">🎬</div>
         <div class="cb">
           <div class="cb-title">Video Demostrativo</div>
-          <div class="cb-desc">
-            Demo en video con recorrido por flujos, módulos y funcionalidades implementadas.
-          </div>
+          <div class="cb-desc">Recorrido en video por flujos, módulos y funcionalidades del sistema.</div>
           <span class="cb-url">loom.com/share/a342bd0…</span>
         </div>
         <div class="arr">→</div>
@@ -397,11 +595,14 @@
     </div>
   </div>
 
-  <!-- ── CÓDIGO Y DATOS ── -->
+  <!-- ── CÓDIGO Y DATOS ─────────────────────────────────────────── -->
   <div class="sec">
-    <div class="sec-label">Código fuente y datos</div>
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--ink)"></span>
+      Código fuente y datos
+    </div>
     <div class="cards cards-2">
-      <a href="https://github.com/DonatoNicolasAyalaOsorio73/Siesa" target="_blank" rel="noopener" class="card cv-purple">
+      <a href="https://github.com/DonatoNicolasAyalaOsorio73/Siesa" target="_blank" rel="noopener" class="card v-ink">
         <div class="ci ci-gray">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="#15233B">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
@@ -410,14 +611,14 @@
         <div class="cb">
           <div class="cb-title">
             Repositorio GitHub
-            <span class="bdg bdg-purple">Open source</span>
+            <span class="bdg bdg-blue">Open source</span>
           </div>
           <div class="cb-desc">Código fuente completo del prototipo Next.js 14 con TypeScript.</div>
           <span class="cb-url">github.com/DonatoNicolas…/Siesa</span>
         </div>
         <div class="arr">→</div>
       </a>
-      <a href="https://docs.google.com/spreadsheets/d/1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY/edit?usp=sharing" target="_blank" rel="noopener" class="card cv-green">
+      <a href="https://docs.google.com/spreadsheets/d/1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY/edit?usp=sharing" target="_blank" rel="noopener" class="card v-green">
         <div class="ci ci-green">📊</div>
         <div class="cb">
           <div class="cb-title">Base de Datos — Google Sheets</div>
@@ -429,20 +630,23 @@
     </div>
   </div>
 
-  <!-- ── CONVERSACIÓN IA ── -->
+  <!-- ── CONVERSACIÓN IA ────────────────────────────────────────── -->
   <div class="sec">
-    <div class="sec-label">Proceso de desarrollo con IA</div>
+    <div class="sec-label">
+      <span class="sec-label-dot" style="background:var(--violet)"></span>
+      Proceso de desarrollo con IA
+    </div>
     <div class="cards">
-      <a href="https://claude.ai/share/86cc4afa-ddb3-4c95-a043-7b99480aae7d" target="_blank" rel="noopener" class="card cv-purple">
-        <div class="ci ci-purple">🤖</div>
+      <a href="https://claude.ai/share/86cc4afa-ddb3-4c95-a043-7b99480aae7d" target="_blank" rel="noopener" class="card v-violet">
+        <div class="ci ci-violet">🤖</div>
         <div class="cb">
           <div class="cb-title">
             Conversación Completa con Claude AI
-            <span class="bdg bdg-purple">Anthropic</span>
+            <span class="bdg bdg-violet">Anthropic</span>
           </div>
           <div class="cb-desc">
-            Sesión compartida de Claude donde se construyó el sistema completo — arquitectura,
-            módulos, integraciones, corrección de bugs y deploy en producción, todo por prompting.
+            Sesión compartida de Claude donde se construyó el sistema completo — arquitectura, módulos,
+            integraciones, corrección de bugs y deploy en producción, todo mediante prompting.
           </div>
           <span class="cb-url">claude.ai/share/86cc4afa-ddb3-4c95…</span>
         </div>
@@ -451,13 +655,27 @@
     </div>
   </div>
 
-  <!-- ── FOOTER ── -->
+  <!-- ── FOOTER ────────────────────────────────────────────────── -->
   <div class="footer">
-    <strong>Siesa MES — Assessment de Desarrollo con IA</strong><br>
-    Construido con <a href="https://claude.ai" target="_blank">Claude AI (Anthropic)</a> &nbsp;·&nbsp;
-    Desplegado en <a href="https://vercel.com" target="_blank">Vercel</a> &nbsp;·&nbsp;
-    Base de datos en <a href="https://workspace.google.com" target="_blank">Google Sheets</a><br>
-    Junio 2026
+    <div class="footer-left">
+      <svg viewBox="0 0 100 100" fill="none">
+        <path d="M0 0 L50 0 L0 50 Z" fill="#15233B"/>
+        <path d="M50 50 L100 0 L100 50 Z" fill="#15233B"/>
+        <path d="M0 50 L50 50 L0 100 Z" fill="#15233B"/>
+        <path d="M50 100 L100 50 L100 100 Z" fill="#15233B"/>
+      </svg>
+      <div>
+        <div class="footer-brand">Siesa MES</div>
+        <div class="footer-sub">Assessment de Desarrollo con IA</div>
+      </div>
+    </div>
+    <div class="footer-right">
+      Diseño: <a href="https://claude.ai" target="_blank">Claude Design</a> &nbsp;·&nbsp;
+      Código: <a href="https://claude.ai/code" target="_blank">Claude Code</a> &nbsp;·&nbsp;
+      Prompts: <a href="https://claude.ai" target="_blank">Claude AI</a><br>
+      Deploy: <a href="https://vercel.com" target="_blank">Vercel</a> &nbsp;·&nbsp;
+      Base de datos: <a href="https://workspace.google.com" target="_blank">Google Sheets</a> &nbsp;·&nbsp; Junio 2026
+    </div>
   </div>
 
 </div>
