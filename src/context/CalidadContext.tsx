@@ -61,6 +61,7 @@ export interface EventoTrazabilidad {
     | 'NO_CONFORMIDAD'
     | 'ORDEN_DETENIDA'
     | 'INSPECCION_APROBADA'
+    | 'ORDEN_LIBERADA'
   ordenId: string
   loteId: string
   descripcion: string
@@ -158,7 +159,7 @@ function crearInspeccionDesdeOrden(orden: OrdenProduccion): Inspeccion {
 const CalidadContext = createContext<CalidadState | null>(null)
 
 export function CalidadProvider({ children }: { children: ReactNode }) {
-  const { ordenes, ordenesConInspeccionPendiente, rechazarLote: appRechazarLote, resolverInspeccionPendiente, crearAlerta } = useAppContext()
+  const { ordenes, ordenesConInspeccionPendiente, rechazarLote: appRechazarLote, resolverInspeccionPendiente, crearAlerta, crearAlertaLocal, cargando: appCargando } = useAppContext()
 
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([])
   const [noConformidades, setNoConformidades] = useState<NoConformidad[]>([])
@@ -187,8 +188,25 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
   // Refs para evitar stale closures sin agregar inspecciones/ordenes al dep array
   const inspeccionesRef = useRef(inspecciones)
   const ordenesRef = useRef(ordenes)
+  const noConformidadesRef = useRef(noConformidades)
   useEffect(() => { inspeccionesRef.current = inspecciones }, [inspecciones])
   useEffect(() => { ordenesRef.current = ordenes }, [ordenes])
+  useEffect(() => { noConformidadesRef.current = noConformidades }, [noConformidades])
+
+  // Sintetiza alertas en memoria para NCs abiertas que no tienen alerta en Sheets
+  const ncAlertasSintetizadas = useRef(false)
+  useEffect(() => {
+    if (cargando || appCargando || ncAlertasSintetizadas.current) return
+    ncAlertasSintetizadas.current = true
+    noConformidadesRef.current
+      .filter((nc) => nc.estadoCierre !== 'CERRADA')
+      .forEach((nc) =>
+        crearAlertaLocal(
+          { tipo: 'NC_CREADA', mensaje: `NC ${nc.id} abierta — ${nc.severidad}`, detalle: `${nc.tipoDefecto} · Orden ${nc.ordenId}`, ordenId: nc.ordenId, loteId: nc.loteId, link: '/calidad/no-conformidades', modulo: 'CALIDAD' },
+          `SYN-NC-${nc.id}`
+        )
+      )
+  }, [cargando, appCargando, crearAlertaLocal])
 
   // Sincroniza nuevas inspecciones cuando Manufactura completa operaciones.
   // El guard `cargando` evita crear duplicados antes de que la carga inicial termine.
@@ -236,18 +254,30 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       )
       pushASheets('inspecciones', 'PUT', { id, estado: 'APROBADA', resultados, observaciones } as unknown as Record<string, unknown>)
 
-      const evento: EventoTrazabilidad = {
-        id: `TR-${Date.now()}`,
+      const ahora = new Date().toISOString()
+      const eventoAprobacion: EventoTrazabilidad = {
+        id: `TR-${Date.now()}-apr`,
         tipo: 'INSPECCION_APROBADA',
         ordenId: ins.ordenId,
         loteId: ins.loteId,
         descripcion: `Lote ${ins.loteId} aprobado por control de calidad`,
         actor: ins.inspector ?? 'Inspector',
-        timestamp: new Date().toISOString(),
+        timestamp: ahora,
         modulo: 'CALIDAD',
       }
-      setTrazabilidad((prev) => [...prev, evento])
-      pushASheets('trazabilidad', 'POST', evento as unknown as Record<string, unknown>)
+      const eventoLiberacion: EventoTrazabilidad = {
+        id: `TR-${Date.now()}-lib`,
+        tipo: 'ORDEN_LIBERADA',
+        ordenId: ins.ordenId,
+        loteId: ins.loteId,
+        descripcion: `Lote ${ins.loteId} liberado para distribución`,
+        actor: ins.inspector ?? 'Inspector',
+        timestamp: ahora,
+        modulo: 'CALIDAD',
+      }
+      setTrazabilidad((prev) => [...prev, eventoAprobacion, eventoLiberacion])
+      pushASheets('trazabilidad', 'POST', eventoAprobacion as unknown as Record<string, unknown>)
+      pushASheets('trazabilidad', 'POST', eventoLiberacion as unknown as Record<string, unknown>)
 
       resolverInspeccionPendiente(ins.ordenId)
 

@@ -116,6 +116,7 @@ interface AppState {
   marcarTodasLeidas: () => void
   eliminarAlerta: (alertaId: string) => void
   crearAlerta: (data: Omit<Alerta, 'id' | 'timestamp' | 'leida'>) => void
+  crearAlertaLocal: (data: Omit<Alerta, 'id' | 'timestamp' | 'leida'>, synId?: string) => void
   setPrediccionIA: (p: PrediccionIA | null) => void
   // CRUD Órdenes
   crearOrden: (data: Omit<OrdenProduccion, 'id' | 'loteId' | 'cantidadProducida' | 'cantidadRechazada' | 'fechaFin' | 'operacionActual'>) => void
@@ -161,7 +162,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLotesRechazados(Array.from(new Set(ord.filter((o) => o.estado === 'DETENIDA').map((o) => o.loteId))))
       }
       if (mue && mue.length > 0) setMuestras(mue)
-      if (ale && ale.length > 0) setAlertas(ale)
+      // Alertas: cargar existentes + sintetizar en memoria para estados activos sin alerta previa
+      {
+        const loaded = ale ?? []
+        const synAlerts: Alerta[] = []
+        if (ord && ord.length > 0) {
+          const idsInspAlert = new Set(loaded.filter((a) => a.tipo === 'INSPECCION_REQUERIDA').map((a) => a.ordenId))
+          const idsRechAlert = new Set(loaded.filter((a) => a.tipo === 'LOTE_RECHAZADO').map((a) => a.ordenId))
+          ord.filter((o) => o.requiereInspeccion && !idsInspAlert.has(o.id)).forEach((o) =>
+            synAlerts.push({ id: `SYN-INS-${o.id}`, tipo: 'INSPECCION_REQUERIDA', mensaje: `Orden ${o.id} requiere inspección de calidad`, detalle: `${o.producto} · Lote ${o.loteId}`, ordenId: o.id, loteId: o.loteId, link: '/calidad/inspecciones', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: false })
+          )
+          ord.filter((o) => o.estado === 'DETENIDA' && !idsRechAlert.has(o.id)).forEach((o) =>
+            synAlerts.push({ id: `SYN-REC-${o.id}`, tipo: 'LOTE_RECHAZADO', mensaje: `Lote ${o.loteId} rechazado — Orden ${o.id} detenida`, detalle: `${o.producto} · requiere acción correctiva`, ordenId: o.id, loteId: o.loteId, link: '/calidad/no-conformidades', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: false })
+          )
+        }
+        if (loaded.length > 0 || synAlerts.length > 0) setAlertas([...loaded, ...synAlerts])
+      }
       setCargando(false)
     }).catch(() => { clearTimeout(safety); setCargando(false) })
   }
@@ -180,6 +196,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     setAlertas((prev) => [nueva, ...prev])
     pushASheets('alertas', 'POST', nueva as unknown as Record<string, unknown>)
+  }, [])
+
+  // Igual que crearAlerta pero NO persiste en Sheets; para alertas sintéticas de datos históricos
+  const crearAlertaLocal = useCallback((data: Omit<Alerta, 'id' | 'timestamp' | 'leida'>, synId?: string) => {
+    const id = synId ?? `ALT-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`
+    setAlertas((prev) => {
+      if (prev.some((a) => a.id === id)) return prev
+      return [{ ...data, id, timestamp: new Date().toISOString(), leida: false }, ...prev]
+    })
   }, [])
 
   const completarOperacion = useCallback((ordenId: string) => {
@@ -220,6 +245,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Limpia el flag de inspección pendiente cuando una inspección se cierra (aprobada o rechazada)
   const resolverInspeccionPendiente = useCallback((ordenId: string) => {
     setOrdenesConInspeccionPendiente((prev) => prev.filter((id) => id !== ordenId))
+    // Eliminar también la alerta sintética de sesión para que desaparezca sin reload
+    setAlertas((prev) => prev.filter((a) => a.id !== `SYN-INS-${ordenId}`))
     const orden = ordenesRef.current.find((o) => o.id === ordenId)
     if (orden && orden.requiereInspeccion) {
       const updated = { ...orden, requiereInspeccion: false }
@@ -253,12 +280,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAlertas((prev) =>
       prev.map((a) => (a.id === alertaId ? { ...a, leida: true } : a))
     )
-    pushASheets('alertas', 'PUT', { id: alertaId, leida: true })
+    if (!alertaId.startsWith('SYN-')) pushASheets('alertas', 'PUT', { id: alertaId, leida: true })
   }, [])
 
   const marcarTodasLeidas = useCallback(() => {
     setAlertas((prev) => {
-      prev.filter((a) => !a.leida).forEach((a) =>
+      prev.filter((a) => !a.leida && !a.id.startsWith('SYN-')).forEach((a) =>
         pushASheets('alertas', 'PUT', { id: a.id, leida: true })
       )
       return prev.map((a) => ({ ...a, leida: true }))
@@ -267,7 +294,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const eliminarAlerta = useCallback((alertaId: string) => {
     setAlertas((prev) => prev.filter((a) => a.id !== alertaId))
-    pushASheets('alertas', 'DELETE', { id: alertaId })
+    if (!alertaId.startsWith('SYN-')) pushASheets('alertas', 'DELETE', { id: alertaId })
   }, [])
 
   // ── CRUD Órdenes ─────────────────────────────────────────────────────────────
@@ -342,6 +369,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         marcarTodasLeidas,
         eliminarAlerta,
         crearAlerta,
+        crearAlertaLocal,
         prediccionIA,
         setPrediccionIA,
         crearOrden,

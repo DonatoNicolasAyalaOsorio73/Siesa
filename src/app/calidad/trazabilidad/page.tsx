@@ -3,12 +3,9 @@
 import { useState, useMemo } from 'react'
 import { Search, Package } from 'lucide-react'
 import { useCalidadContext, type EventoTrazabilidad } from '@/context/CalidadContext'
+import { useAppContext } from '@/context/AppContext'
 import PageHeader from '@/components/manufactura/PageHeader'
 import TimelineEvent, { type TipoEvento, type ModuloEvento } from '@/components/calidad/TimelineEvent'
-
-// ─── LOTES RÁPIDOS ────────────────────────────────────────────────────────────
-
-const LOTES_RAPIDOS = ['LOT-A-001', 'LOT-B-002', 'LOT-A-003']
 
 // ─── MAPA TIPO EVENTO → PROPS TIMELINE ───────────────────────────────────────
 
@@ -25,20 +22,65 @@ const TIPO_MAP: Record<string, { tipo: TipoEvento; modulo: ModuloEvento }> = {
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function TrazabilidadPage() {
-  const { trazabilidad } = useCalidadContext()
+  const { trazabilidad, inspecciones, noConformidades } = useCalidadContext()
+  const { ordenes } = useAppContext()
   const [busqueda, setBusqueda] = useState('')
   const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
+
+  // Sintetiza eventos en memoria para datos históricos que no tienen eventos en Sheets
+  const eventosSinteticos = useMemo<EventoTrazabilidad[]>(() => {
+    const existentes = new Set(trazabilidad.map((e) => `${e.tipo}::${e.ordenId}`))
+    const sinteticos: EventoTrazabilidad[] = []
+
+    ordenes.filter((o) => o.estado !== 'PENDIENTE').forEach((o) => {
+      if (!existentes.has(`INICIO_PRODUCCION::${o.id}`))
+        sinteticos.push({ id: `SYN-IP-${o.id}`, tipo: 'INICIO_PRODUCCION', ordenId: o.id, loteId: o.loteId, descripcion: `Orden ${o.id} iniciada — ${o.producto}`, actor: o.operario, timestamp: o.fechaInicio, modulo: 'MANUFACTURA' })
+    })
+
+    inspecciones.forEach((ins) => {
+      if (!existentes.has(`INSPECCION_DISPARADA::${ins.ordenId}`))
+        sinteticos.push({ id: `SYN-ID-${ins.ordenId}`, tipo: 'INSPECCION_DISPARADA', ordenId: ins.ordenId, loteId: ins.loteId, descripcion: 'Inspección de calidad disparada', actor: 'Sistema', timestamp: ins.fechaDisparo, modulo: 'CALIDAD' })
+      if (ins.estado === 'APROBADA' && !existentes.has(`INSPECCION_APROBADA::${ins.ordenId}`))
+        sinteticos.push({ id: `SYN-IA-${ins.ordenId}`, tipo: 'INSPECCION_APROBADA', ordenId: ins.ordenId, loteId: ins.loteId, descripcion: `Lote ${ins.loteId} aprobado`, actor: ins.inspector ?? 'Inspector', timestamp: ins.fechaDisparo, modulo: 'CALIDAD' })
+      if (ins.estado === 'APROBADA' && !existentes.has(`ORDEN_LIBERADA::${ins.ordenId}`) && !sinteticos.some((s) => s.tipo === 'ORDEN_LIBERADA' && s.ordenId === ins.ordenId))
+        sinteticos.push({ id: `SYN-OL-${ins.ordenId}`, tipo: 'ORDEN_LIBERADA', ordenId: ins.ordenId, loteId: ins.loteId, descripcion: `Lote ${ins.loteId} liberado`, actor: ins.inspector ?? 'Inspector', timestamp: ins.fechaDisparo, modulo: 'CALIDAD' })
+    })
+
+    noConformidades.forEach((nc) => {
+      if (!existentes.has(`NO_CONFORMIDAD::${nc.ordenId}`) && !sinteticos.some((s) => s.tipo === 'NO_CONFORMIDAD' && s.ordenId === nc.ordenId))
+        sinteticos.push({ id: `SYN-NC-${nc.id}`, tipo: 'NO_CONFORMIDAD', ordenId: nc.ordenId, loteId: nc.loteId, descripcion: `${nc.id} — ${nc.severidad}: ${nc.tipoDefecto}`, actor: nc.inspector, timestamp: nc.fecha, modulo: 'CALIDAD' })
+    })
+
+    ordenes.filter((o) => o.estado === 'DETENIDA').forEach((o) => {
+      if (!existentes.has(`ORDEN_DETENIDA::${o.id}`))
+        sinteticos.push({ id: `SYN-OD-${o.id}`, tipo: 'ORDEN_DETENIDA', ordenId: o.id, loteId: o.loteId, descripcion: `Orden ${o.id} detenida por rechazo de lote`, actor: 'Sistema', timestamp: o.fechaInicio, modulo: 'MANUFACTURA' })
+    })
+
+    return sinteticos
+  }, [trazabilidad, ordenes, inspecciones, noConformidades])
+
+  const todosLosEventos = useMemo(
+    () => [...trazabilidad, ...eventosSinteticos],
+    [trazabilidad, eventosSinteticos]
+  )
+
+  // Top 3 lotes con más actividad (chips dinámicos)
+  const lotesRecientes = useMemo(() => {
+    const conteo: Record<string, number> = {}
+    todosLosEventos.forEach((e) => { conteo[e.loteId] = (conteo[e.loteId] ?? 0) + 1 })
+    return Object.entries(conteo).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l]) => l)
+  }, [todosLosEventos])
 
   // Lotes únicos en todos los eventos
   const lotesDisponibles = useMemo(() => {
     const set = new Set<string>()
-    trazabilidad.forEach((e) => set.add(e.loteId))
+    todosLosEventos.forEach((e) => set.add(e.loteId))
     return Array.from(set)
-  }, [trazabilidad])
+  }, [todosLosEventos])
 
   // Filtrar eventos por lote o búsqueda
   const eventosFiltrados = useMemo(() => {
-    let lista = trazabilidad
+    let lista = todosLosEventos
     if (loteSeleccionado) {
       lista = lista.filter((e) => e.loteId === loteSeleccionado)
     }
@@ -95,7 +137,7 @@ export default function TrazabilidadPage() {
           >
             Todos
           </button>
-          {LOTES_RAPIDOS.filter((l) => lotesDisponibles.includes(l)).map((lote) => (
+          {lotesRecientes.filter((l) => lotesDisponibles.includes(l)).map((lote) => (
             <button
               key={lote}
               onClick={() => { setLoteSeleccionado(lote); setBusqueda('') }}
