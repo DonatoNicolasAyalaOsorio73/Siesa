@@ -221,7 +221,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const completarOperacion = useCallback((ordenId: string) => {
     const orden = ordenesRef.current.find((o) => o.id === ordenId)
-    if (!orden) return
+    if (!orden || orden.estado === 'COMPLETADA') return
 
     const { nuevoIndice, esCompletada, requiereInspeccion } = calcularProgresoOperacion(
       orden.operacionActual,
@@ -327,19 +327,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // ── CRUD Órdenes ─────────────────────────────────────────────────────────────
 
   const crearOrden = useCallback((
-    data: Omit<OrdenProduccion, 'id' | 'loteId' | 'cantidadProducida' | 'cantidadRechazada' | 'fechaFin' | 'operacionActual'>
+    data: Omit<OrdenProduccion, 'id' | 'loteId' | 'cantidadProducida' | 'cantidadRechazada' | 'fechaFin' | 'operacionActual'> & { _totalOperaciones?: number }
   ) => {
-    const id = `OP-${new Date().getFullYear()}-${String(ordenesRef.current.length + 1 + (Date.now() % 100)).padStart(3, '0')}`
+    const { _totalOperaciones, ...ordenData } = data
+    const total = _totalOperaciones && _totalOperaciones > 0 ? _totalOperaciones : 1
+    const id = `OP-${new Date().getFullYear()}-${String(Date.now()).slice(-5)}`
     const ultimaLetra = data.lineaProduccion.charAt(data.lineaProduccion.length - 1)
     const loteId = `LOT-${ultimaLetra}-${Date.now().toString().slice(-3)}`
     const nueva: OrdenProduccion = {
-      ...data,
+      ...ordenData,
       id,
       loteId,
       cantidadProducida: 0,
       cantidadRechazada: 0,
       fechaFin: null,
-      operacionActual: { nombre: 'Pendiente', indice: 0, total: 1 },
+      operacionActual: { nombre: 'Operación 1', indice: 0, total },
     }
     setOrdenes((prev) => [...prev, nueva])
     pushASheets('ordenes', 'POST', nueva as unknown as Record<string, unknown>)

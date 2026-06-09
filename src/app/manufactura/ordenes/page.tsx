@@ -208,6 +208,7 @@ function DetalleOrden({
 
 export default function OrdenesPage() {
   const { ordenes, completarOperacion, crearOrden, editarOrden, eliminarOrden, iniciarOrden } = useAppContext()
+  const { rutas } = useManufacturaContext()
   const [filtroActivo, setFiltroActivo] = useState<Filtro>('TODAS')
   const [busqueda, setBusqueda] = useState('')
   const [ordenSeleccionada, setOrdenSeleccionada] = useState<OrdenProduccion | null>(null)
@@ -267,7 +268,9 @@ export default function OrdenesPage() {
       editarOrden(ordenEditar.id, data)
       mostrarToast('Orden actualizada correctamente', 'success')
     } else {
-      crearOrden(data as Omit<OrdenProduccion, 'id' | 'loteId' | 'cantidadProducida' | 'cantidadRechazada' | 'fechaFin' | 'operacionActual'>)
+      const ruta = rutas.find((r) => r.id === data.rutaId)
+      const _totalOperaciones = ruta?.operaciones?.length ?? 1
+      crearOrden({ ...data, _totalOperaciones } as Parameters<typeof crearOrden>[0])
       mostrarToast('Orden creada correctamente', 'success')
     }
     setModalAbierto(false)
