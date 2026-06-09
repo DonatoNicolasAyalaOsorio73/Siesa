@@ -146,6 +146,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const ordenesRef = useRef(ordenes)
   useEffect(() => { ordenesRef.current = ordenes }, [ordenes])
 
+  // IDs de alertas SYN descartadas manualmente — persisten en localStorage
+  const dismissedSynRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dismissedSynAlerts')
+      if (stored) dismissedSynRef.current = new Set(JSON.parse(stored) as string[])
+    } catch { /* localStorage no disponible */ }
+  }, [])
+
   function cargarTodo() {
     setCargando(true)
     const safety = setTimeout(() => setCargando(false), 15000)
@@ -169,11 +178,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (ord && ord.length > 0) {
           const idsInspAlert = new Set(loaded.filter((a) => a.tipo === 'INSPECCION_REQUERIDA').map((a) => a.ordenId))
           const idsRechAlert = new Set(loaded.filter((a) => a.tipo === 'LOTE_RECHAZADO').map((a) => a.ordenId))
-          ord.filter((o) => o.requiereInspeccion && !idsInspAlert.has(o.id)).forEach((o) =>
-            synAlerts.push({ id: `SYN-INS-${o.id}`, tipo: 'INSPECCION_REQUERIDA', mensaje: `Orden ${o.id} requiere inspección de calidad`, detalle: `${o.producto} · Lote ${o.loteId}`, ordenId: o.id, loteId: o.loteId, link: '/calidad/inspecciones', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: false })
+          const dismissed = dismissedSynRef.current
+          let readSyn = new Set<string>()
+          try { readSyn = new Set(JSON.parse(localStorage.getItem('readSynAlerts') ?? '[]') as string[]) } catch { /* ignore */ }
+          ord.filter((o) => o.requiereInspeccion && !idsInspAlert.has(o.id) && !dismissed.has(`SYN-INS-${o.id}`)).forEach((o) =>
+            synAlerts.push({ id: `SYN-INS-${o.id}`, tipo: 'INSPECCION_REQUERIDA', mensaje: `Orden ${o.id} requiere inspección de calidad`, detalle: `${o.producto} · Lote ${o.loteId}`, ordenId: o.id, loteId: o.loteId, link: '/calidad/inspecciones', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: readSyn.has(`SYN-INS-${o.id}`) })
           )
-          ord.filter((o) => o.estado === 'DETENIDA' && !idsRechAlert.has(o.id)).forEach((o) =>
-            synAlerts.push({ id: `SYN-REC-${o.id}`, tipo: 'LOTE_RECHAZADO', mensaje: `Lote ${o.loteId} rechazado — Orden ${o.id} detenida`, detalle: `${o.producto} · requiere acción correctiva`, ordenId: o.id, loteId: o.loteId, link: '/calidad/no-conformidades', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: false })
+          ord.filter((o) => o.estado === 'DETENIDA' && !idsRechAlert.has(o.id) && !dismissed.has(`SYN-REC-${o.id}`)).forEach((o) =>
+            synAlerts.push({ id: `SYN-REC-${o.id}`, tipo: 'LOTE_RECHAZADO', mensaje: `Lote ${o.loteId} rechazado — Orden ${o.id} detenida`, detalle: `${o.producto} · requiere acción correctiva`, ordenId: o.id, loteId: o.loteId, link: '/calidad/no-conformidades', modulo: 'CALIDAD', timestamp: o.fechaInicio, leida: readSyn.has(`SYN-REC-${o.id}`) })
           )
         }
         if (loaded.length > 0 || synAlerts.length > 0) setAlertas([...loaded, ...synAlerts])
@@ -280,7 +292,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAlertas((prev) =>
       prev.map((a) => (a.id === alertaId ? { ...a, leida: true } : a))
     )
-    if (!alertaId.startsWith('SYN-')) pushASheets('alertas', 'PUT', { id: alertaId, leida: true })
+    if (alertaId.startsWith('SYN-')) {
+      // Persistir estado leído de alertas SYN en localStorage
+      try {
+        const key = 'readSynAlerts'
+        const prev = new Set(JSON.parse(localStorage.getItem(key) ?? '[]') as string[])
+        prev.add(alertaId)
+        localStorage.setItem(key, JSON.stringify(Array.from(prev)))
+      } catch { /* ignore */ }
+    } else {
+      pushASheets('alertas', 'PUT', { id: alertaId, leida: true })
+    }
   }, [])
 
   const marcarTodasLeidas = useCallback(() => {
@@ -294,7 +316,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const eliminarAlerta = useCallback((alertaId: string) => {
     setAlertas((prev) => prev.filter((a) => a.id !== alertaId))
-    if (!alertaId.startsWith('SYN-')) pushASheets('alertas', 'DELETE', { id: alertaId })
+    if (alertaId.startsWith('SYN-')) {
+      dismissedSynRef.current.add(alertaId)
+      try { localStorage.setItem('dismissedSynAlerts', JSON.stringify(Array.from(dismissedSynRef.current))) } catch { /* ignore */ }
+    } else {
+      pushASheets('alertas', 'DELETE', { id: alertaId })
+    }
   }, [])
 
   // ── CRUD Órdenes ─────────────────────────────────────────────────────────────
