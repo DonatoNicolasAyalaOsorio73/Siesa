@@ -60,13 +60,24 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   const [dictando, setDictando] = useState(false)
   const [textoInterino, setTextoInterino] = useState('')
   const [countdownIA, setCountdownIA] = useState<number | null>(null)
-  const [speechDisponible] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
-  })
+  // Detectado en useEffect para evitar el bug de SSR donde window es undefined
+  const [speechDisponible, setSpeechDisponible] = useState(false)
   const reconocimientoRef = useRef<any>(null)
   const dictandoRef = useRef(false)
   const countdownIARef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const autoAnalizarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Refs para evitar stale closures en timeouts/callbacks
+  const mensajeOperarioRef = useRef(mensajeOperario)
+  const handleAnalizarIA_ref = useRef<() => void>(() => {})
+  useEffect(() => { mensajeOperarioRef.current = mensajeOperario }, [mensajeOperario])
+
+  // Detectar Web Speech API solo en el cliente (no durante SSR)
+  useEffect(() => {
+    setSpeechDisponible(
+      typeof window !== 'undefined' &&
+      ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+    )
+  }, [])
 
   // Auto-reintento cuando hay CUOTA:N
   useEffect(() => {
@@ -134,7 +145,8 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   const iniciarReconocimiento = useCallback(() => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const rec = new SpeechRec()
-    rec.lang = 'es-CO'
+    // es-CO primero; el navegador usa es-ES si no tiene es-CO disponible
+    rec.lang = navigator.language.startsWith('es') ? navigator.language : 'es-CO'
     rec.continuous = true
     rec.interimResults = true
 
@@ -188,20 +200,32 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   function handleDictar() {
     if (!speechDisponible) return
     if (dictandoRef.current) {
+      // Detener dictado
       dictandoRef.current = false
       reconocimientoRef.current?.stop()
       setDictando(false)
       setTextoInterino('')
+      // Auto-analizar con IA 800ms después de detener (si hay texto)
+      if (autoAnalizarTimerRef.current) clearTimeout(autoAnalizarTimerRef.current)
+      autoAnalizarTimerRef.current = setTimeout(() => {
+        if (mensajeOperarioRef.current.trim()) handleAnalizarIA_ref.current()
+      }, 800)
       return
     }
+    // Limpiar cualquier análisis anterior al iniciar nueva dictación
+    if (autoAnalizarTimerRef.current) clearTimeout(autoAnalizarTimerRef.current)
+    setIaResultado(null)
+    setIaError(null)
+    setIaAplicado(false)
     dictandoRef.current = true
     setDictando(true)
     iniciarReconocimiento()
   }
 
   // ── Llamada a la API de IA ──
-  async function handleAnalizarIA() {
-    if (!mensajeOperario.trim()) return
+  const handleAnalizarIA = useCallback(async () => {
+    const texto = mensajeOperarioRef.current.trim()
+    if (!texto) return
     setIaLoading(true)
     setIaResultado(null)
     setIaError(null)
@@ -213,7 +237,7 @@ export default function InspectionForm({ parametros, onResultadosChange, context
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           modo: 'asistente_defectos',
-          payload: { mensaje: mensajeOperario, contextoOrden: ctxOrden },
+          payload: { mensaje: texto, contextoOrden: ctxOrden },
         }),
       })
       const data = await res.json()
@@ -227,7 +251,11 @@ export default function InspectionForm({ parametros, onResultadosChange, context
     } finally {
       setIaLoading(false)
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctxOrden])
+
+  // Mantener el ref al día para que los timeouts siempre llamen la versión actual
+  useEffect(() => { handleAnalizarIA_ref.current = handleAnalizarIA }, [handleAnalizarIA])
 
   function handleUsarAnalisis() {
     if (!iaResultado) return
@@ -286,26 +314,32 @@ export default function InspectionForm({ parametros, onResultadosChange, context
           )}
 
           {/* Botones */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Dictar */}
             <button
               type="button"
               onClick={handleDictar}
-              title={speechDisponible ? (dictando ? 'Detener dictado' : 'Dictar defecto') : 'Dictado disponible en Chrome. Escribe el defecto manualmente.'}
+              title={
+                !speechDisponible
+                  ? 'Dictado disponible en Chrome/Edge. Escribe el defecto manualmente.'
+                  : dictando
+                  ? 'Detener dictado (la IA analizará automáticamente)'
+                  : 'Dictar defecto con el micrófono'
+              }
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                 dictando
                   ? 'bg-[#EF4444] text-white border-[#EF4444]'
                   : speechDisponible
                   ? 'bg-white text-[#5A6B85] border-[#E8EDF4] hover:border-[#6E56E0] hover:text-[#6E56E0]'
-                  : 'bg-[#F4F7FB] text-[#97A4B8] border-[#E8EDF4] cursor-not-allowed'
+                  : 'bg-[#F4F7FB] text-[#97A4B8] border-[#E8EDF4] cursor-not-allowed opacity-50'
               }`}
               disabled={iaLoading}
             >
               {dictando ? <MicOff size={13} /> : <Mic size={13} />}
-              {dictando ? 'Detener' : 'Dictar'}
+              {dictando ? 'Detener y analizar' : 'Dictar'}
             </button>
 
-            {/* Analizar */}
+            {/* Analizar manual */}
             <button
               type="button"
               onClick={handleAnalizarIA}
@@ -319,6 +353,13 @@ export default function InspectionForm({ parametros, onResultadosChange, context
               )}
             </button>
           </div>
+
+          {/* Hint flujo rápido */}
+          {!dictando && !iaLoading && !iaResultado && speechDisponible && (
+            <p className="text-[10px] text-[#97A4B8]">
+              Pulsa <strong className="text-[#6E56E0]">Dictar</strong>, describe el defecto y al detener la IA analizará automáticamente.
+            </p>
+          )}
 
           {/* Banner sin API key / clave inválida */}
           {(iaResultado?._razon === 'SIN_KEY' || iaResultado?._razon === 'CLAVE_INVALIDA') && (
