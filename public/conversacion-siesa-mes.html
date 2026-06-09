@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conversación Siesa MES — 86 prompts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: #F4F7FB; color: #15233B; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 24px; }
+
+  .cover {
+    background: linear-gradient(135deg, #1F6CF0 0%, #1450BE 100%);
+    color: white; border-radius: 20px; padding: 48px 40px; margin-bottom: 36px;
+  }
+  .cover-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .cover-logo svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .brand-name { font-size: 26px; font-weight: 700; }
+  .brand-tag { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: .08em; margin-top: 2px; }
+  .cover-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .cover-subtitle { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 28px; }
+  .cover-chips { display: flex; gap: 12px; flex-wrap: wrap; }
+  .chip {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; padding: 9px 16px; font-size: 13px;
+  }
+  .chip strong { display: block; font-size: 20px; font-weight: 700; line-height: 1.2; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: #97A4B8; padding: 0 4px 12px;
+  }
+
+  .prompt {
+    background: white; border-radius: 14px; border: 1px solid #E8EDF4;
+    margin-bottom: 12px; overflow: hidden; page-break-inside: avoid;
+  }
+  .prompt-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 18px; background: #F7FAFD; border-bottom: 1px solid #E8EDF4;
+  }
+  .prompt-num {
+    background: #1F6CF0; color: white; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 6px; white-space: nowrap;
+  }
+  .prompt-fecha { font-size: 11px; color: #97A4B8; }
+  .prompt-body {
+    padding: 14px 18px; font-size: 13px; line-height: 1.75;
+    color: #2D3F5A; white-space: pre-wrap; word-break: break-word;
+  }
+
+  .footer {
+    text-align: center; font-size: 11.5px; color: #97A4B8;
+    padding: 32px 0 12px; border-top: 1px solid #E8EDF4; margin-top: 28px;
+  }
+
+  @media print {
+    body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 0; max-width: 100%; }
+    .cover { border-radius: 10px; }
+    .prompt { page-break-inside: avoid; margin-bottom: 8px; }
+    @page { margin: 1.5cm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover">
+    <div class="cover-logo">
+      <svg viewBox="0 0 100 100" fill="none">
+        <path d="M0 0 L50 0 L0 50 Z" fill="#fff"/>
+        <path d="M50 50 L100 0 L100 50 Z" fill="#fff"/>
+        <path d="M0 50 L50 50 L0 100 Z" fill="#fff"/>
+        <path d="M50 100 L100 50 L100 100 Z" fill="#fff"/>
+      </svg>
+      <div>
+        <div class="brand-name">Siesa MES</div>
+        <div class="brand-tag">MANUFACTURING EXECUTION SYSTEM</div>
+      </div>
+    </div>
+    <div class="cover-title">Historial de Conversación</div>
+    <div class="cover-subtitle">Registro completo de todos los prompts enviados durante el desarrollo</div>
+    <div class="cover-chips">
+      <div class="chip"><strong>86</strong>Prompts</div>
+      <div class="chip"><strong>Next.js 14</strong>Stack</div>
+      <div class="chip"><strong>Google Sheets</strong>Base de datos</div>
+      <div class="chip"><strong>Jun 2026</strong>Exportado</div>
+    </div>
+  </div>
+
+  <div class="section-label">Prompts — Orden cronológico</div>
+
+  
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#1</span>
+      <span class="prompt-fecha">6/06/2026, 8:07 p. m.</span>
+    </div>
+    <div class="prompt-body">Eres un desarrollador senior de aplicaciones ERP industriales. Vamos a construir 
+un prototipo funcional de alta fidelidad llamado "Siesa MES" basado en la suite 
+ERP real de Siesa (siesa.com), empresa colombiana líder en software empresarial.
+
+// URL para la base de datos publicado como xlsx → Google Sheets
+const PUBLISHED_ID = "2PACX-1vQsPU676mE9kv7nlj8HRT6xjEE-kGAtvTkRumjYHURd0OPc9iv_gHpzrhXVcIJZOg"
+const SHEET_ID = "1HwHCUEfGPRG8mpiEEV1qKjSbTqS2dnz3"
+
+// Intenta primero con gviz (Sheet ID original), fallback a CSV publicado
+async function fetchSheet&lt;T&gt;(sheetName: string, mapper: (r: any[]) =&gt; T): Promise&lt;T[]&gt; {
+  // Estrategia 1: gviz API con Sheet ID original
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&amp;sheet=${sheetName}`
+    const res = await fetch(url, { next: { revalidate: 30 } })
+    const text = await res.text()
+    if (text.startsWith('google.visualization')) {
+      const json = JSON.parse(text.substring(47).slice(0, -2))
+      return json.table.rows
+        .filter((row: any) =&gt; row.c?.[0]?.v != null)
+        .map((row: any) =&gt; mapper(row.c.map((c: any) =&gt; c?.v ?? null)))
+    }
+    throw new Error('Not gviz format')
+  } catch {
+    // Estrategia 2: CSV publicado como fallback
+    try {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/e/${PUBLISHED_ID}/pub?output=csv&amp;sheet=${sheetName}`
+      const res = await fetch(csvUrl, { next: { revalidate: 30 } })
+      const text = await res.text()
+      const rows = text.split('\n').slice(1) // skip header
+      return rows
+        .filter(row =&gt; row.trim())
+        .map(row =&gt; {
+          const cols = row.split(',').map(c =&gt; c.replace(/^"|"$/g, '').trim())
+          return mapper(cols)
+        })
+    } catch (e) {
+      console.error(`Sheet fetch failed [${sheetName}]:`, e)
+      return [] // usa mockData como fallback final
+    }
+  }
+}
+
+## DESIGN SYSTEM OFICIAL DE SIESA
+
+### Tokens de color exactos:
+- --siesa-primary: #6EC1E4        /* Azul claro corporativo Siesa */
+- --siesa-secondary: #54595F      /* Gris oscuro textos */
+- --siesa-text: #7A7A7A           /* Gris medio texto secundario */
+- --siesa-accent: #61CE70         /* Verde acento (módulo Calidad) */
+- --siesa-manufactura: #2196F3    /* Azul manufactura (del diagrama de módulos) */
+- --siesa-calidad: #61CE70        /* Verde calidad (del diagrama de módulos) */
+- --siesa-dark: #1A1A2E           /* Sidebar fondo */
+- --siesa-surface: #FFFFFF        /* Cards */
+- --siesa-bg: #F4F6FA             /* Fondo contenido */
+- --siesa-border: #E5E7EB         /* Bordes sutiles */
+- --siesa-success: #61CE70        /* Éxito (mismo verde de accent) */
+- --siesa-warning: #F59E0B        /* Alerta */
+- --siesa-danger: #EF4444         /* Error / rechazo */
+
+### Tipografía oficial (Google Fonts — igual que siesa.com):
+- font-family: 'Roboto', sans-serif  /* Fuente principal del kit Elementor */
+- Pesos: 400 (text), 500 (accent), 600 (primary), 700 (bold UI)
+- Importar: @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&amp;display=swap')
+
+### Componentes base:
+- Botón Manufactura: bg-[#2196F3] text-white rounded-lg px-4 py-2 
+  font-semibold hover:bg-[#1976D2] transition-all duration-200
+- Botón Calidad: bg-[#61CE70] text-white rounded-lg px-4 py-2 
+  font-semibold hover:bg-[#4CAF50] transition-all duration-200
+- Botón secundario: border border-[#6EC1E4] text-[#6EC1E4] rounded-lg 
+  px-4 py-2 hover:bg-[#6EC1E4] hover:text-white transition-all
+- Badge Activo: bg-[#61CE70]/10 text-[#4CAF50] rounded-full text-xs font-medium px-2.5 py-0.5
+- Badge Alerta: bg-[#F59E0B]/10 text-[#D97706] rounded-full text-xs font-medium px-2.5 py-0.5
+- Badge Error: bg-[#EF4444]/10 text-[#DC2626] rounded-full text-xs font-medium px-2.5 py-0.5
+- Card: bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-6
+- Tabla header: bg-[#F4F6FA] text-[#54595F] text-sm font-semibold uppercase tracking-wide
+- Tabla fila: hover:bg-[#F9FAFB] border-b border-[#E5E7EB]
+
+## ARQUITECTURA DE NAVEGACIÓN
+
+### Sidebar izquierdo (width: 260px, bg: #1A1A2E):
+
+HEADER SIDEBAR:
+- Logo: texto "SIESA" en bold color #6EC1E4 + "MES" en blanco
+- Subtexto: "Manufacturing Execution System" en #7A7A7A text-xs
+- Línea separadora sutil
+
+SECCIÓN "MANUFACTURA" (indicador lateral izquierdo color #2196F3):
+Ítems con ícono lucide-react + label, active state: bg-[#2196F3]/10 text-[#6EC1E4] 
+border-l-2 border-[#2196F3]:
+  - Factory icon → "Órdenes de Producción" /manufactura/ordenes
+    [badge azul con conteo de órdenes activas]
+  - GitBranch icon → "Rutas" /manufactura/rutas
+  - Settings icon → "Centros de Trabajo" /manufactura/centros-trabajo
+  - Package icon → "Lista de Materiales" /manufactura/lista-materiales
+  - DollarSign icon → "Estructura de Costos" /manufactura/estructura-costos
+  - Calculator icon → "Costeo de Rutas" /manufactura/costeo-rutas
+  - Clock icon → "Registro de Tiempos" /manufactura/tiempos
+  - BarChart2 icon → "Avance en Planta" /manufactura/avance
+
+SEPARADOR con línea y texto "──────────────" en #2D3748
+
+SECCIÓN "CALIDAD" (indicador lateral izquierdo color #61CE70):
+Active state: bg-[#61CE70]/10 text-[#61CE70] border-l-2 border-[#61CE70]:
+  - FlaskConical icon → "Muestreo" /calidad/muestreo
+  - FileText icon → "Fichas Técnicas" /calidad/fichas-tecnicas
+  - Sliders icon → "Variaciones" /calidad/variaciones
+  - CheckCircle icon → "Entregas Prod. Terminado" /calidad/entregas-producto
+  - RefreshCw icon → "Trabajo en Proceso" /calidad/trabajo-proceso
+    [badge rojo si hay alertas pendientes de integración con Manufactura]
+
+SEPARADOR
+
+SECCIÓN "GERENCIAL":
+  - LayoutDashboard icon → "Dashboard Ejecutivo" /dashboard
+    (active state: bg-[#6EC1E4]/10 text-[#6EC1E4])
+
+FOOTER SIDEBAR:
+- Avatar circular con iniciales "OP" bg-[#2196F3]
+- Nombre: "Operador Planta 1" text-white text-sm font-medium
+- Rol: "Control de Piso" text-[#7A7A7A] text-xs
+- Ícono LogOut en hover
+
+### Header superior (bg-white, border-b border-[#E5E7EB], h-16, px-8):
+- Breadcrumb dinámico: Inicio &gt; [Módulo] &gt; [Vista actual]
+  Color breadcrumb activo según módulo (azul manufactura / verde calidad)
+- DERECHA: 
+  - Chip "● SIESA EN LÍNEA" → dot verde animado (pulse) + texto #61CE70
+  - Reloj en tiempo real formato: "Lun, 15 Ene 2024 — 14:32:05" (Colombia UTC-5)
+  - Ícono Bell (lucide) con badge rojo flotante mostrando notificaciones del AppContext
+  - Separador vertical
+  - Avatar usuario pequeño
+
+### Área contenido (flex-1, bg-[#F4F6FA], overflow-y-auto, p-8):
+- Renderiza children según ruta activa
+
+## ESTADO GLOBAL — src/context/AppContext.tsx
+
+```typescript
+'use client'
+import { createContext, useContext, useState, ReactNode } from 'react'
+
+// TIPOS
+interface OrdenProduccion {
+  id: string
+  producto: string
+  fichaTecnicaId: string
+  rutaId: string
+  lineaProduccion: string
+  cantidadPlanificada: number
+  cantidadProducida: number
+  cantidadRechazada: number
+  estado: 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADA' | 'DETENIDA'
+  prioridad: 'ALTA' | 'MEDIA' | 'BAJA'
+  operario: string
+  fechaInicio: string
+  fechaFin: string | null
+  operacionActual: { nombre: string; indice: number; total: number }
+  requiereInspeccion: boolean
+  loteId: string
+}
+
+interface Muestra {
+  id: string
+  ordenId: string
+  loteId: string
+  producto: string
+  fechaRegistro: string
+  inspector: string
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA' | 'EN_REVISION'
+  resultados: ResultadoInspeccion[]
+  observaciones: string
+}
+
+interface ResultadoInspeccion {
+  parametro: string
+  valorMedido: number
+  valorNominal: number
+  tolerancia: number
+  unidad: string
+  aprobado: boolean
+  critico: boolean
+}
+
+interface Alerta {
+  id: string
+  tipo: 'INSPECCION_REQUERIDA' | 'LOTE_RECHAZADO' | 'TIEMPO_EXCEDIDO' | 'MAQUINA_DETENIDA'
+  mensaje: string
+  ordenId?: string
+  loteId?: string
+  timestamp: string
+  leida: boolean
+  modulo: 'MANUFACTURA' | 'CALIDAD'
+}
+
+interface AppState {
+  ordenes: OrdenProduccion[]
+  muestras: Muestra[]
+  alertas: Alerta[]
+  notificacionesCount: number
+  ordenesConInspeccionPendiente: string[]
+  lotesRechazados: string[]
+  // Acciones
+  completarOperacion: (ordenId: string) =&gt; void
+  rechazarLote: (loteId: string, ordenId: string) =&gt; void
+  marcarAlertaLeida: (alertaId: string) =&gt; void
+}
+```
+
+Implementa las acciones:
+- `completarOperacion(ordenId)`: cambia estado de operación, 
+  agrega a `ordenesConInspeccionPendiente`, crea alerta tipo INSPECCION_REQUERIDA, 
+  incrementa notificacionesCount
+- `rechazarLote(loteId, ordenId)`: agrega a `lotesRechazados`, 
+  cambia orden a estado DETENIDA, crea alerta tipo LOTE_RECHAZADO,
+  incrementa notificacionesCount
+- `marcarAlertaLeida(alertaId)`: marca alerta, recalcula notificacionesCount
+
+## MOCK DATA — src/data/mockData.ts
+(Planta colombiana de manufactura de autopartes)
+
+```typescript
+export const rutas = [
+  {
+    id: "RUT-001",
+    nombre: "Ruta Válvulas Estándar",
+    producto: "Válvula de Escape XR-500",
+    version: "v2.1",
+    estado: "ACTIVA" as const,
+    costoManoObraHora: 35000,
+    operaciones: [
+      { orden: 1, nombre: "Torneado CNC", centroTrabajoId: "CT-001", tiempoSetupMin: 15, tiempoOperacionMin: 8 },
+      { orden: 2, nombre: "Fresado", centroTrabajoId: "CT-002", tiempoSetupMin: 10, tiempoOperacionMin: 12 },
+      { orden: 3, nombre: "Tratamiento Térmico", centroTrabajoId: "CT-003", tiempoSetupMin: 30, tiempoOperacionMin: 45 },
+      { orden: 4, nombre: "Rectificado", centroTrabajoId: "CT-004", tiempoSetupMin: 10, tiempoOperacionMin: 6 },
+      { orden: 5, nombre: "Inspección Final", centroTrabajoId: "CT-005", tiempoSetupMin: 5, tiempoOperacionMin: 4 }
+    ]
+  },
+  {
+    id: "RUT-002",
+    nombre: "Ruta Pistones Premium",
+    producto: "Pistón Motor 4L-200",
+    version: "v1.3",
+    estado: "ACTIVA" as const,
+    costoManoObraHora: 42000,
+    operaciones: [
+      { orden: 1, nombre: "Fundición", centroTrabajoId: "CT-006", tiempoSetupMin: 45, tiempoOperacionMin: 60 },
+      { orden: 2, nombre: "Mecanizado CNC", centroTrabajoId: "CT-001", tiempoSetupMin: 20, tiempoOperacionMin: 25 },
+      { orden: 3, nombre: "Anodizado", centroTrabajoId: "CT-007", tiempoSetupMin: 15, tiempoOperacionMin: 30 },
+      { orden: 4, nombre: "Control Dimensional", centroTrabajoId: "CT-005", tiempoSetupMin: 5, tiempoOperacionMin: 8 }
+    ]
+  }
+]
+
+export const centrosTrabajo = [
+  { id: "CT-001", nombre: "Torno CNC Mazak #1", tipo: "MAQUINARIA" as const, capacidadHoraDia: 8, operador: "Carlos Mendoza", estado: "OPERATIVO" as const, eficiencia: 0.94, costoHora: 85000 },
+  { id: "CT-002", nombre: "Fresadora DMG #1", tipo: "MAQUINARIA" as const, capacidadHoraDia: 8, operador: "Ana Ríos", estado: "OPERATIVO" as const, eficiencia: 0.88, costoHora: 72000 },
+  { id: "CT-003", nombre: "Horno Tratamiento Térmico", tipo: "MAQUINARIA" as const, capacidadHoraDia: 16, operador: "Miguel Torres", estado: "MANTENIMIENTO" as const, eficiencia: 0, costoHora: 45000 },
+  { id: "CT-004", nombre: "Rectificadora Studer", tipo: "MAQUINARIA" as const, capacidadHoraDia: 8, operador: "Pedro Salcedo", estado: "OPERATIVO" as const, eficiencia: 0.91, costoHora: 68000 },
+  { id: "CT-005", nombre: "Estación de Calidad", tipo: "INSPECCION" as const, capacidadHoraDia: 8, operador: "Laura Gómez", estado: "OPERATIVO" as const, eficiencia: 1.0, costoHora: 55000 }
+]
+
+export const fichasTecnicas = [
+  {
+    id: "FT-001",
+    producto: "Válvula de Escape XR-500",
+    version: "v3.0",
+    nivelAceptableCalidad: 0.025,
+    frecuenciaMuestreo: "Cada 50 unidades",
+    tamanoMuestra: 5,
+    criterios: [
+      { parametro: "Diámetro exterior", valorNominal: 25.4, tolerancia: 0.02, unidad: "mm", critico: true },
+      { parametro: "Dureza superficial", valorNominal: 58, tolerancia: 2, unidad: "HRC", critico: true },
+      { parametro: "Rugosidad Ra", valorNominal: 0.8, tolerancia: 0.2, unidad: "μm", critico: false },
+      { parametro: "Presión de prueba", valorNominal: 150, tolerancia: 5, unidad: "PSI", critico: true }
+    ]
+  }
+]
+
+export const ordenesIniciales = [
+  {
+    id: "OP-2024-001",
+    producto: "Válvula de Escape XR-500",
+    fichaTecnicaId: "FT-001",
+    rutaId: "RUT-001",
+    lineaProduccion: "Línea A",
+    cantidadPlanificada: 500,
+    cantidadProducida: 387,
+    cantidadRechazada: 0,
+    estado: "EN_PROCESO" as const,
+    prioridad: "ALTA" as const,
+    operario: "Carlos Mendoza",
+    fechaInicio: "2024-01-15T06:00:00",
+    fechaFin: null,
+    operacionActual: { nombre: "Rectificado", indice: 4, total: 5 },
+    requiereInspeccion: false,
+    loteId: "LOT-A-001"
+  },
+  {
+    id: "OP-2024-002",
+    producto: "Pistón Motor 4L-200",
+    fichaTecnicaId: "FT-001",
+    rutaId: "RUT-002",
+    lineaProduccion: "Línea B",
+    cantidadPlanificada: 200,
+    cantidadProducida: 200,
+    cantidadRechazada: 12,
+    estado: "COMPLETADA" as const,
+    prioridad: "MEDIA" as const,
+    operario: "Ana Ríos",
+    fechaInicio: "2024-01-14T07:00:00",
+    fechaFin: "2024-01-15T16:30:00",
+    operacionActual: { nombre: "Control Dimensional", indice: 4, total: 4 },
+    requiereInspeccion: true,
+    loteId: "LOT-B-002"
+  },
+  {
+    id: "OP-2024-003",
+    producto: "Válvula de Escape XR-500",
+    fichaTecnicaId: "FT-001",
+    rutaId: "RUT-001",
+    lineaProduccion: "Línea A",
+    cantidadPlanificada: 300,
+    cantidadProducida: 145,
+    cantidadRechazada: 23,
+    estado: "DETENIDA" as const,
+    prioridad: "ALTA" as const,
+    operario: "Pedro Salcedo",
+    fechaInicio: "2024-01-15T08:00:00",
+    fechaFin: null,
+    operacionActual: { nombre: "Fresado", indice: 2, total: 5 },
+    requiereInspeccion: false,
+    loteId: "LOT-A-003"
+  },
+  {
+    id: "OP-2024-004",
+    producto: "Pistón Motor 4L-200",
+    fichaTecnicaId: "FT-001",
+    rutaId: "RUT-002",
+    lineaProduccion: "Línea C",
+    cantidadPlanificada: 150,
+    cantidadProducida: 0,
+    cantidadRechazada: 0,
+    estado: "PENDIENTE" as const,
+    prioridad: "BAJA" as const,
+    operario: "Miguel Torres",
+    fechaInicio: "2024-01-16T06:00:00",
+    fechaFin: null,
+    operacionActual: { nombre: "Fundición", indice: 0, total: 4 },
+    requiereInspeccion: false,
+    loteId: "LOT-C-004"
+  }
+]
+
+// KPIs calculados para el dashboard
+export const calcularKPIs = (ordenes: typeof ordenesIniciales) =&gt; ({
+  ordenesActivas: ordenes.filter(o =&gt; o.estado === 'EN_PROCESO').length,
+  inspeccionesPendientes: ordenes.filter(o =&gt; o.requiereInspeccion).length,
+  firstPassYield: (() =&gt; {
+    const completadas = ordenes.filter(o =&gt; o.estado === 'COMPLETADA')
+    if (!completadas.length) return 0
+    const total = completadas.reduce((sum, o) =&gt; sum + o.cantidadPlanificada, 0)
+    const rechazadas = completadas.reduce((sum, o) =&gt; sum + o.cantidadRechazada, 0)
+    return Math.round(((total - rechazadas) / total) * 100)
+  })(),
+  alertasCriticas: ordenes.filter(o =&gt; o.estado === 'DETENIDA').length
+})
+```
+## REFERENCIA FUNCIONAL UX (comportamiento, NO diseño visual)
+
+Toma como referencia los patrones de interacción de estos ERPs industriales
+para garantizar que la experiencia sea reconocible para usuarios de manufactura:
+
+### De SAP S/4HANA Manufacturing (SAP Fiori):
+- Las Órdenes de Producción usan una vista de lista con filtros rápidos 
+  por estado (En proceso / Completada / Detenida) en la parte superior
+- El detalle de una orden muestra un stepper horizontal de operaciones 
+  con su estado (✓ completada, ● activa, ○ pendiente)
+- Los centros de trabajo muestran un indicador de carga tipo gauge (0-100%)
+- Las tablas tienen búsqueda inline y paginación en el footer
+
+### De Oracle Manufacturing Cloud:
+- El "Shop Floor" (Avance en Planta) usa tarjetas kanban por línea de producción,
+  no tablas — cada tarjeta muestra: orden, producto, % avance con barra de progreso,
+  operario asignado y tiempo restante estimado
+- Las alertas críticas aparecen como un banner colapsable en la parte superior
+  del contenido, no como modales interrumpivos
+
+### De Microsoft Dynamics 365 Supply Chain:
+- El registro de tiempos usa un formulario de "fichar entrada/salida" 
+  estilo punch-clock con botón grande de START/STOP por operación
+- La trazabilidad muestra un árbol de relaciones: 
+  Orden → Lote → Componentes → Proveedor
+
+## IMPORTANTE — Aplicar referencia funcional con identidad Siesa:
+Estos patrones de UX deben implementarse usando EXCLUSIVAMENTE los colores,
+tipografía y componentes del design system de Siesa definidos arriba.
+Nunca uses azul SAP (#0070F2), azul Oracle (#C74634) ni colores de Dynamics.
+La referencia es de COMPORTAMIENTO, no de apariencia.
+
+## INSTRUCCIONES TÉCNICAS:
+- Next.js 14 App Router con TypeScript estricto
+- Dependencias: tailwindcss, lucide-react, recharts, date-fns
+- tailwind.config.ts debe extender colors con los tokens Siesa
+- Sidebar sticky, scroll independiente al contenido
+- useEffect para reloj en tiempo real cada segundo
+- Hora: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota', 
+  weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+  hour: '2-digit', minute: '2-digit', second: '2-digit' })
+- Layout responsivo (sidebar colapsa con hamburger en &lt;768px)
+- Todos los textos de UI en español colombiano
+
+## ENTREGABLES DE ESTE PROMPT (solo esto, no más):
+1. Estructura completa de carpetas del proyecto
+2. tailwind.config.ts con tokens de color Siesa
+3. src/app/layout.tsx — layout principal con sidebar + header
+4. src/components/Sidebar.tsx — sidebar completo funcional
+5. src/components/Header.tsx — header con reloj, alertas, breadcrumb
+6. src/context/AppContext.tsx — estado global con acciones
+7. src/data/mockData.ts — todos los datos
+8. src/app/page.tsx — home/dashboard con 4 KPI cards:
+   [Órdenes Activas | Inspecciones Pendientes | First Pass Yield | Alertas Críticas]
+   Cada card con su color Siesa, ícono lucide y valor calculado del mockData
+
+NO generes aún las páginas internas de cada módulo</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#2</span>
+      <span class="prompt-fecha">6/06/2026, 9:38 p. m.</span>
+    </div>
+    <div class="prompt-body">NO USEMOS CLAUDE API:</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#3</span>
+      <span class="prompt-fecha">6/06/2026, 9:45 p. m.</span>
+    </div>
+    <div class="prompt-body">Build Error
+Failed to compile
+
+Next.js (14.2.5) is outdated (learn more)
+./src/app/api/ia/route.ts:1:1
+Module not found: Can't resolve '@google/generative-ai'
+&gt; 1 | import { GoogleGenerativeAI } from '@google/generative-ai'
+    | ^
+  2 | import { NextRequest, NextResponse } from 'next/server'
+  3 |
+  4 | const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+
+https://nextjs.org/docs/messages/module-not-found</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#4</span>
+      <span class="prompt-fecha">6/06/2026, 9:47 p. m.</span>
+    </div>
+    <div class="prompt-body">Error de conexión
+
+No se pudo generar el análisis. Verifica la configuración en .env.local</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#5</span>
+      <span class="prompt-fecha">6/06/2026, 9:51 p. m.</span>
+    </div>
+    <div class="prompt-body">Analizar Riesgo de Producción
+Analiza 4 órdenes activas y 3 indicadores en tiempo real para detectar riesgos de fallo de calidad antes de que ocurran.
+
+Error al llamar a Gemini API
+
+[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 ] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.
+
+La clave Gemini debe empezar con AIza. Obtén una en aistudio.google.com/app/apikey y reemplaza GEMINI_API_KEY en .env.local.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#6</span>
+      <span class="prompt-fecha">6/06/2026, 9:56 p. m.</span>
+    </div>
+    <div class="prompt-body">Error al llamar a Gemini API
+
+Error de red: fetch failed
+
+La clave Gemini debe empezar con AIza. Obtén una en aistudio.google.com/app/apikey y reemplaza GEMINI_API_KEY en .env.local.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#7</span>
+      <span class="prompt-fecha">6/06/2026, 10:33 p. m.</span>
+    </div>
+    <div class="prompt-body">El proyecto Siesa MES tiene archivos vacíos en src/app/calidad/.
+Necesito que los generes completos desde cero.
+
+NO toques ningún archivo fuera de src/app/calidad/ y src/components/calidad/
+
+════════════════════════════════════════════════
+## CORRECCIÓN — MÓDULO CALIDAD COMPLETO
+════════════════════════════════════════════════
+
+Lee primero estos archivos existentes para entender el contexto:
+- src/context/AppContext.tsx (para saber qué datos y acciones existen)
+- src/data/mockData.ts (para entender la estructura de datos)
+- src/components/manufactura/SlideOver.tsx (para reutilizarlo)
+- src/components/manufactura/StatusBadge.tsx (para reutilizarlo)
+- src/components/manufactura/PageHeader.tsx (para reutilizarlo)
+- src/components/manufactura/Toast.tsx (para reutilizarlo)
+
+════════════════════════════════════════════════
+## ARCHIVO 1: src/app/calidad/inspecciones/page.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+Página principal del módulo Calidad — bandeja de inspecciones.
+
+IMPORTS necesarios:
+  useState, useEffect de react
+  useAppContext del contexto
+  lucide-react: ClipboardCheck, Clock, Search, User, 
+                CheckCircle, XCircle, AlertTriangle, Eye
+  SlideOver, PageHeader, StatusBadge de manufactura
+  InspectionForm de calidad (lo crearemos abajo)
+
+ESTADO LOCAL:
+  filtro: 'TODAS' | 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADA'
+  busqueda: string
+  inspeccionSeleccionada: Inspeccion | null
+  slideOverAbierto: boolean
+  toastMsg: { msg: string, tipo: 'success'|'error'|'warning' } | null
+
+DATOS del AppContext:
+  inspecciones, ordenes, parametrosCalidad,
+  aprobarInspeccion, rechazarLote
+
+LÓGICA DE FILTRADO:
+  const inspeccionesFiltradas = inspecciones
+    .filter(i =&gt; filtro === 'TODAS' || i.estado === filtro)
+    .filter(i =&gt; 
+      busqueda === '' ||
+      i.id.toLowerCase().includes(busqueda.toLowerCase()) ||
+      i.ordenId.toLowerCase().includes(busqueda.toLowerCase()) ||
+      i.productoNombre.toLowerCase().includes(busqueda.toLowerCase())
+    )
+
+FUNCIÓN calcularTiempoEspera(fechaDisparo: string): 
+  Retorna minutos desde fechaDisparo hasta ahora
+  const diff = Date.now() - new Date(fechaDisparo).getTime()
+  return Math.floor(diff / 60000)
+
+FUNCIÓN colorTiempoEspera(min: number):
+  &lt; 30 → 'text-green-600'
+  30-60 → 'text-orange-500'
+  &gt; 60 → 'text-red-600 font-bold'
+
+FUNCIÓN labelTiempoEspera(min: number):
+  &lt; 30 → '{min} min'
+  30-60 → '{min} min ⚠'
+  &gt; 60 → '{min} min 🚨 SLA vencido'
+
+RENDER:
+
+1. PageHeader título="Inspecciones Pendientes" 
+   subtítulo="Bandeja de entrada — Módulo Calidad"
+
+2. BANNER DE INTEGRACIÓN (solo si hay pendientes):
+   const pendientes = inspecciones.filter(i =&gt; i.estado === 'PENDIENTE').length
+   Si pendientes &gt; 0:
+   &lt;div className="bg-[#2196F3]/10 border border-[#2196F3] rounded-xl p-4 mb-6 
+                   flex items-center justify-between"&gt;
+     &lt;div className="flex items-center gap-3"&gt;
+       &lt;ClipboardCheck className="text-[#2196F3]" size={20} /&gt;
+       &lt;span className="text-[#1A1A2E] font-medium"&gt;
+         {pendientes} inspección(es) nueva(s) generada(s) desde Manufactura
+       &lt;/span&gt;
+     &lt;/div&gt;
+     &lt;span className="text-sm text-[#2196F3] font-medium"&gt;Revisa y asigna inspector&lt;/span&gt;
+   &lt;/div&gt;
+
+3. BARRA DE FILTROS:
+   - 4 chips: Todas({total}) | Pendientes({n}) | En Proceso({n}) | Completadas({n})
+     activo: bg-[#61CE70] text-white | inactivo: bg-white border text-[#54595F]
+   - Input busqueda con ícono Search a la izquierda
+
+4. TABLA:
+   Si inspeccionesFiltradas.length === 0:
+     &lt;div className="text-center py-16 text-[#7A7A7A]"&gt;
+       No hay inspecciones con los filtros aplicados
+     &lt;/div&gt;
+
+   Sino tabla con estas columnas:
+   
+   thead bg-[#F4F6FA]:
+     ID | Orden Origen | Lote | Producto | Línea | 
+     Tiempo Espera | Inspector | Estado | Acciones
+   
+   tbody, por cada inspeccion en inspeccionesFiltradas:
+   - ID: texto mono text-xs text-[#54595F]
+   - Orden Origen: badge azul pequeño
+   - Lote: texto mono text-xs
+   - Producto: font-medium
+   - Línea: text-sm text-[#7A7A7A]
+   - Tiempo Espera: 
+       const min = calcularTiempoEspera(inspeccion.fechaDisparo)
+       &lt;span className={colorTiempoEspera(min)}&gt;
+         {labelTiempoEspera(min)}
+       &lt;/span&gt;
+   - Inspector: inspeccion.inspectorAsignado || 
+       &lt;span className="text-[#7A7A7A] italic"&gt;Sin asignar&lt;/span&gt;
+   - Estado: &lt;StatusBadge estado={inspeccion.estado} /&gt;
+   - Acciones: 2 botones
+       Botón 1: &lt;Eye size={16}/&gt; "Ver / Iniciar"
+         onClick={() =&gt; { setInspeccionSeleccionada(inspeccion); setSlideOverAbierto(true) }}
+         className="flex items-center gap-1 px-3 py-1.5 bg-[#61CE70] text-white 
+                    rounded-lg text-sm hover:bg-[#4CAF50] transition"
+       Botón 2: &lt;User size={16}/&gt; (reasignar — decorativo por ahora)
+         className="p-1.5 border border-[#E5E7EB] rounded-lg hover:bg-[#F4F6FA] transition"
+
+5. SLIDEOVER (tamaño "lg"):
+   Título: "Inspección — " + inspeccionSeleccionada?.productoNombre
+   Subtítulo: badge con inspeccionSeleccionada?.loteId
+
+   Contenido cuando inspeccionSeleccionada !== null:
+   
+   SECCIÓN INFO (4 mini-cards en grid 2x2):
+     Orden: inspeccionSeleccionada.ordenId
+     Línea: linea de la orden correspondiente (busca en ordenes[])
+     Inspector: inspectorAsignado || "Sin asignar"
+     Tiempo espera: calcularTiempoEspera(fechaDisparo) + " min"
+   
+   SEPARADOR con título "Parámetros de Inspección"
+   
+   PARÁMETROS DE CALIDAD:
+     Busca parametrosCalidad filtrados por el producto de la inspección
+     Si hay parámetros: renderiza InspectionForm
+     Si no hay: mensaje "Sin parámetros definidos para este producto"
+   
+   FOOTER del SlideOver (2 botones):
+     [Aprobar Lote] → bg-[#61CE70] → 
+       aprobarInspeccion(inspeccionSeleccionada.id)
+       setSlideOverAbierto(false)
+       setToastMsg({ msg: '✓ Lote aprobado — Orden liberada en Manufactura', tipo: 'success' })
+     
+     [Rechazar Lote] → bg-[#EF4444] →
+       rechazarLote(inspeccionSeleccionada.loteId, inspeccionSeleccionada.ordenId, 'Defecto detectado en inspección')
+       setSlideOverAbierto(false)
+       setToastMsg({ msg: '⚠ Lote rechazado — Manufactura notificada', tipo: 'warning' })
+
+6. TOAST: si toastMsg !== null, muestra Toast y limpia después de 3s
+
+════════════════════════════════════════════════
+## ARCHIVO 2: src/components/calidad/InspectionForm.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+Props:
+  interface Props {
+    parametros: Array&lt;{
+      parametro: string
+      valorNominal: number
+      tolerancia: number
+      unidad: string
+      critico: boolean
+    }&gt;
+    productoNombre: string
+  }
+
+ESTADO:
+  valores: Record&lt;string, string&gt; = {} (clave: parametro, valor: string del input)
+  resultados: Record&lt;string, boolean&gt; = {} (true=aprobado, false=rechazado)
+  
+  // IA
+  mensajeOperario: string
+  iaLoading: boolean
+  iaResultado: any | null
+  iaError: string
+
+LÓGICA:
+  const handleValorChange = (parametro: string, valor: string) =&gt; {
+    setValores(prev =&gt; ({ ...prev, [parametro]: valor }))
+    const num = parseFloat(valor)
+    const param = parametros.find(p =&gt; p.parametro === parametro)
+    if (param &amp;&amp; !isNaN(num)) {
+      const aprobado = Math.abs(num - param.valorNominal) &lt;= param.tolerancia
+      setResultados(prev =&gt; ({ ...prev, [parametro]: aprobado }))
+    }
+  }
+
+  const resultadoGeneral = () =&gt; {
+    const criticos = parametros.filter(p =&gt; p.critico)
+    if (criticos.length === 0) return null
+    const todosMedidos = criticos.every(p =&gt; valores[p.parametro] !== undefined)
+    if (!todosMedidos) return null
+    const todosAprobados = criticos.every(p =&gt; resultados[p.parametro] === true)
+    return todosAprobados ? 'APROBADO' : 'RECHAZADO'
+  }
+
+  const analizarConIA = async () =&gt; {
+    if (!mensajeOperario.trim()) return
+    setIaLoading(true)
+    setIaError('')
+    setIaResultado(null)
+    try {
+      const res = await fetch('/api/ia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          modo: 'asistente_defectos',
+          payload: {
+            mensaje: mensajeOperario,
+            contextoOrden: {
+              id: 'Inspección activa',
+              producto: productoNombre,
+              operacionActual: 'Inspección de calidad'
+            }
+          }
+        })
+      })
+      const data = await res.json()
+      if (data.ok) setIaResultado(data.clasificacion)
+      else setIaError('No se pudo analizar. Completa el formulario manualmente.')
+    } catch {
+      setIaError('Siesa AI no disponible. Completa el formulario manualmente.')
+    } finally {
+      setIaLoading(false)
+    }
+  }
+
+RENDER:
+
+SECCIÓN IA (card con bg-gradient-to-r from-[#7C3AED]/5 to-[#6EC1E4]/5 
+             border border-[#7C3AED]/20 rounded-xl p-4 mb-6):
+
+  Header: "🤖 Asistente de Calidad — Siesa AI" 
+          badge pequeño "Gemini Flash" bg-[#7C3AED]/10 text-[#7C3AED]
+  Subtexto: "Describe el defecto en tus propias palabras"
+
+  Textarea (4 filas):
+    placeholder="Ej: el diámetro está muy grande, se nota que la máquina torneó de más..."
+    value={mensajeOperario}
+    onChange={e =&gt; setMensajeOperario(e.target.value)}
+    className="w-full border border-[#E5E7EB] rounded-lg p-3 text-sm 
+               focus:outline-none focus:border-[#7C3AED] resize-none"
+
+  Botones en fila:
+    [✨ Analizar con IA] → onClick={analizarConIA} disabled={iaLoading || !mensajeOperario}
+      className según estado: loading → "opacity-50 cursor-not-allowed" 
+      normal → "bg-[#7C3AED] text-white"
+    
+    Si iaLoading: muestra spinner inline + "Analizando con Siesa AI..."
+
+  Si iaError: 
+    &lt;p className="text-orange-600 text-sm mt-2 bg-orange-50 p-2 rounded"&gt;⚠ {iaError}&lt;/p&gt;
+
+  Si iaResultado:
+    Card resultado bg-white border border-[#61CE70] rounded-xl p-4 mt-3:
+      Header verde: "✓ Análisis completado por Siesa AI"
+      Grid 2 columnas:
+        Tipo: badge según tipoDefecto
+        Severidad: badge rojo/naranja/amarillo
+        Parámetro afectado: texto
+        Requiere detención: "✓ Sí" rojo | "No" verde
+      Descripción técnica: texto italic
+      Acción inmediata: texto con ícono AlertTriangle
+      Confianza: barra de progreso morada {Math.round(iaResultado.confianza*100)}%
+      
+      Botón "✓ Usar este análisis":
+        bg-[#61CE70] text-white → no hace nada funcional por ahora
+        (muestra en consola el resultado)
+
+SEPARADOR con título "Parámetros a Medir"
+
+LISTA DE PARÁMETROS:
+  Por cada param en parametros:
+  
+  &lt;div className="border border-[#E5E7EB] rounded-xl p-4 mb-3 
+                  {resultados[param.parametro] === false ? 'border-red-300 bg-red-50' : 
+                   resultados[param.parametro] === true ? 'border-green-300 bg-green-50' : ''}"&gt;
+    
+    Fila superior:
+      Nombre del parámetro font-medium
+      Si critico: badge rojo "CRÍTICO"
+      Nominal: {valorNominal} {unidad} · Tolerancia: ±{tolerancia} {unidad}
+    
+    Fila input:
+      Label "Valor medido:"
+      &lt;input type="number" step="0.01"
+        value={valores[param.parametro] || ''}
+        onChange={e =&gt; handleValorChange(param.parametro, e.target.value)}
+        className="border rounded-lg px-3 py-1.5 w-32 text-center
+                   focus:outline-none focus:border-[#2196F3]"
+        placeholder="0.00"
+      /&gt;
+      Unidad: {param.unidad}
+      
+      Si hay valor medido:
+        aprobado → &lt;span className="text-green-600 font-medium"&gt;✓ Dentro de tolerancia&lt;/span&gt;
+        rechazado → &lt;span className="text-red-600 font-medium"&gt;✗ Fuera de rango&lt;/span&gt;
+
+RESULTADO GENERAL (al final, solo si resultadoGeneral() !== null):
+  APROBADO → div bg-green-100 border-green-500 text-green-800 "✓ LOTE APROBADO"
+  RECHAZADO → div bg-red-100 border-red-500 text-red-800 "✗ LOTE RECHAZADO — Parámetro crítico fuera de rango"
+
+════════════════════════════════════════════════
+## ARCHIVO 3: src/app/calidad/no-conformidades/page.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+DATOS: noConformidades, ordenes del AppContext
+
+KPI CARDS (3 en fila):
+  Total NC: noConformidades.length → ícono AlertTriangle naranja
+  Críticas: noConformidades.filter(nc =&gt; nc.severidad === 'CRITICA').length → rojo
+  Cerradas: 0 (dato mock estático) → verde
+
+TABLA:
+  Columnas: ID NC | Orden | Lote | Producto | Línea | 
+            Tipo Defecto | Cant. Afectada | Severidad | 
+            Estado Orden | Inspector | Fecha | Acciones
+
+  Severidad badge:
+    CRITICA → bg-red-100 text-red-700 font-bold
+    MAYOR → bg-orange-100 text-orange-700
+    MENOR → bg-yellow-100 text-yellow-700
+
+  Estado Orden badge:
+    DETENIDA → bg-red-100 text-red-700
+    MERMA → bg-orange-100 text-orange-700
+
+  Fecha formateada:
+    new Date(nc.fecha).toLocaleDateString('es-CO', { timeZone: 'America/Bogota' })
+
+  Acciones: botón Eye → abre SlideOver
+
+SLIDEOVER de NC:
+  Toda la información de la NC
+  Sección "Acción Correctiva":
+    Muestra nc.accionCorrectiva
+    Select estado cierre: [Abierta | En Proceso | Cerrada]
+    Textarea "Agregar nota de seguimiento"
+    Botón "Guardar nota" (actualiza estado local)
+  
+  Sección "Impacto en Producción":
+    Busca la orden afectada en ordenes[]
+    Muestra orden.estado actual con StatusBadge
+    Si DETENIDA: texto rojo "Producción detenida por esta NC"
+    Link "Ver orden →" (decorativo)
+
+════════════════════════════════════════════════
+## ARCHIVO 4: src/app/calidad/trazabilidad/page.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+DATOS: trazabilidad, noConformidades del AppContext
+
+ESTADO:
+  busqueda: string
+  loteSeleccionado: string | null
+
+LOTES ÚNICOS:
+  const lotesUnicos = [...new Set(trazabilidad.map(t =&gt; t.loteId))]
+
+EVENTOS FILTRADOS:
+  const eventosFiltrados = trazabilidad
+    .filter(t =&gt; !loteSeleccionado || t.loteId === loteSeleccionado)
+    .filter(t =&gt; 
+      busqueda === '' ||
+      t.loteId.toLowerCase().includes(busqueda.toLowerCase()) ||
+      t.ordenId.toLowerCase().includes(busqueda.toLowerCase())
+    )
+    .sort((a, b) =&gt; new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+RENDER:
+
+PageHeader título="Trazabilidad de Lotes"
+
+BUSCADOR central (prominente):
+  &lt;div className="relative max-w-lg mx-auto mb-6"&gt;
+    &lt;Search className="absolute left-3 top-3 text-[#7A7A7A]" size={20}/&gt;
+    &lt;input placeholder="Buscar por ID de Lote o Orden Ej: LOT-A-001"
+           className="w-full pl-10 pr-4 py-3 border border-[#E5E7EB] rounded-xl
+                      text-lg focus:outline-none focus:border-[#2196F3]"
+           value={busqueda} onChange={e =&gt; setBusqueda(e.target.value)} /&gt;
+  &lt;/div&gt;
+
+CHIPS DE LOTES (horizontales):
+  [Todos los lotes] + por cada lote en lotesUnicos: [LOT-A-001] [LOT-B-002] etc
+  activo: bg-[#2196F3] text-white | inactivo: bg-white border
+
+TIMELINE VERTICAL:
+  Si no hay eventos: "Selecciona un lote o busca por ID"
+  
+  Si hay eventos, agrupa por loteId y muestra cada grupo:
+  
+  Header del grupo:
+    &lt;h3 className="font-bold text-[#1A1A2E] text-lg mb-4"&gt;
+      📦 Lote: {loteId} — {eventosDeLote[0].ordenId}
+    &lt;/h3&gt;
+  
+  Por cada evento en el grupo, componente TimelineEvent:
+    &lt;TimelineEvent evento={evento} esUltimo={index === grupo.length - 1} /&gt;
+  
+  Si hay NC para este lote (busca en noConformidades por loteId):
+    Card roja al final:
+    &lt;div className="bg-red-50 border border-red-300 rounded-xl p-4 ml-8 mt-2"&gt;
+      &lt;p className="text-red-700 font-medium"&gt;⚠ No Conformidad Registrada&lt;/p&gt;
+      &lt;p className="text-red-600 text-sm"&gt;{nc.id} · {nc.severidad} · {nc.descripcion}&lt;/p&gt;
+    &lt;/div&gt;
+
+════════════════════════════════════════════════
+## ARCHIVO 5: src/components/calidad/TimelineEvent.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+Props:
+  interface Props {
+    evento: {
+      id: string
+      loteId: string
+      ordenId: string
+      productoNombre: string
+      evento: string
+      detalle: string
+      responsable: string
+      timestamp: string
+      modulo: 'MANUFACTURA' | 'CALIDAD'
+    }
+    esUltimo: boolean
+  }
+
+CONFIG de íconos y colores por tipo de evento:
+  const config: Record&lt;string, { icono: LucideIcon, color: string, bg: string }&gt; = {
+    INICIO_PRODUCCION:    { icono: Factory,      color: '#2196F3', bg: 'bg-blue-100' },
+    OPERACION_COMPLETADA: { icono: CheckCircle,   color: '#2196F3', bg: 'bg-blue-100' },
+    INSPECCION_DISPARADA: { icono: Search,        color: '#61CE70', bg: 'bg-green-100' },
+    INSPECCION_APROBADA:  { icono: ShieldCheck,   color: '#61CE70', bg: 'bg-green-100' },
+    NO_CONFORMIDAD:       { icono: AlertTriangle, color: '#EF4444', bg: 'bg-red-100'   },
+    ORDEN_DETENIDA:       { icono: StopCircle,    color: '#EF4444', bg: 'bg-red-100'   },
+  }
+  const cfg = config[evento.evento] || { icono: Circle, color: '#7A7A7A', bg: 'bg-gray-100' }
+  const Icono = cfg.icono
+
+COLOR de la línea conectora:
+  evento.modulo === 'MANUFACTURA' → 'border-[#2196F3]'
+  evento.modulo === 'CALIDAD' → 'border-[#61CE70]'
+
+RENDER:
+  &lt;div className="flex gap-4 relative"&gt;
+    
+    Columna izquierda (ícono + línea):
+    &lt;div className="flex flex-col items-center"&gt;
+      &lt;div className={`w-10 h-10 rounded-full ${cfg.bg} flex items-center justify-center flex-shrink-0`}&gt;
+        &lt;Icono size={18} style={{ color: cfg.color }} /&gt;
+      &lt;/div&gt;
+      Si no esUltimo:
+        &lt;div className={`w-0.5 h-full border-l-2 ${colorLinea} mt-1`} /&gt;
+    &lt;/div&gt;
+    
+    Columna derecha (contenido):
+    &lt;div className="pb-6 flex-1"&gt;
+      &lt;div className="flex items-center justify-between"&gt;
+        &lt;h4 className="font-semibold text-[#1A1A2E] text-sm"&gt;
+          {evento.evento.replace(/_/g, ' ')}
+        &lt;/h4&gt;
+        &lt;span className={`text-xs px-2 py-0.5 rounded-full
+          ${evento.modulo === 'MANUFACTURA' 
+            ? 'bg-blue-100 text-blue-700' 
+            : 'bg-green-100 text-green-700'}`}&gt;
+          {evento.modulo}
+        &lt;/span&gt;
+      &lt;/div&gt;
+      &lt;p className="text-[#54595F] text-sm mt-1"&gt;{evento.detalle}&lt;/p&gt;
+      &lt;div className="flex items-center gap-3 mt-2 text-xs text-[#7A7A7A]"&gt;
+        &lt;span&gt;👤 {evento.responsable}&lt;/span&gt;
+        &lt;span&gt;🕐 {new Date(evento.timestamp).toLocaleString('es-CO', 
+          { timeZone: 'America/Bogota', day:'2-digit', month:'short', 
+            hour:'2-digit', minute:'2-digit' })}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+════════════════════════════════════════════════
+## ARCHIVO 6: src/app/calidad/indicadores/page.tsx
+════════════════════════════════════════════════
+
+'use client'
+
+IMPORTS:
+  recharts: BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+            Tooltip, Legend, ReferenceLine, ResponsiveContainer,
+            LineChart, Line, Area, AreaChart
+  date-fns para fechas
+  useAppContext para indicadores
+  calidadData para tendenciaTiempoEspera
+  dynamic de next/dynamic (para recharts sin SSR)
+
+IMPORTANTE: importa recharts con dynamic para evitar SSR errors:
+  const ResponsiveBarChart = dynamic(
+    () =&gt; import('recharts').then(m =&gt; ({ default: m.BarChart })), 
+    { ssr: false }
+  )
+  ... (mismo patrón para BarChart, AreaChart, LineChart, etc)
+  
+  O más simple: envuelve las gráficas en:
+  const [mounted, setMounted] = useState(false)
+  useEffect(() =&gt; setMounted(true), [])
+  {mounted &amp;&amp; &lt;ResponsiveContainer&gt;...&lt;/ResponsiveContainer&gt;}
+
+DATOS:
+  const { indicadores } = useAppContext()
+  import { tendenciaTiempoEspera } from '@/data/calidadData'
+
+KPI CARDS (4 en fila):
+  FPY Global: promedio de indicadores.map(i =&gt; i.fpyHoy) → formato %
+    color verde si &gt;= 0.95 | rojo si &lt; 0.95
+    barra de progreso con línea de meta
+  Total NC: 2 (mock) 
+  Tiempo Espera Prom: promedio de indicadores.map(i =&gt; i.tiempoEsperaPromMin) + " min"
+    naranja si &gt; 30
+  Lotes: Aprobados 4 | Rechazados 2 (mock)
+
+GRÁFICA 1 — BarChart FPY por Línea:
+  &lt;ResponsiveContainer width="100%" height={280}&gt;
+    &lt;BarChart data={indicadores} margin={{ top:20, right:30, left:0, bottom:5 }}&gt;
+      &lt;CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" /&gt;
+      &lt;XAxis dataKey="linea" /&gt;
+      &lt;YAxis tickFormatter={v =&gt; `${(v*100).toFixed(0)}%`} domain={[0.8, 1]} /&gt;
+      &lt;Tooltip formatter={(v: number) =&gt; `${(v*100).toFixed(1)}%`} /&gt;
+      &lt;Legend /&gt;
+      &lt;ReferenceLine y={0.95} stroke="#EF4444" strokeDasharray="5 5" 
+                     label={{ value: 'Meta 95%', fill: '#EF4444', fontSize: 12 }} /&gt;
+      &lt;Bar dataKey="fpyHoy" name="FPY Hoy" fill="#2196F3" radius={[4,4,0,0]} /&gt;
+      &lt;Bar dataKey="fpySemana" name="FPY Semana" fill="#6EC1E4" radius={[4,4,0,0]} /&gt;
+    &lt;/BarChart&gt;
+  &lt;/ResponsiveContainer&gt;
+
+GRÁFICA 2 — AreaChart Tiempo de Espera:
+  &lt;ResponsiveContainer width="100%" height={280}&gt;
+    &lt;AreaChart data={tendenciaTiempoEspera}&gt;
+      &lt;defs&gt;
+        &lt;linearGradient id="gradTiempo" x1="0" y1="0" x2="0" y2="1"&gt;
+          &lt;stop offset="5%" stopColor="#2196F3" stopOpacity={0.3}/&gt;
+          &lt;stop offset="95%" stopColor="#2196F3" stopOpacity={0}/&gt;
+        &lt;/linearGradient&gt;
+      &lt;/defs&gt;
+      &lt;CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" /&gt;
+      &lt;XAxis dataKey="hora" /&gt;
+      &lt;YAxis /&gt;
+      &lt;Tooltip formatter={(v: number) =&gt; `${v} min`} 
+               labelFormatter={l =&gt; `Hora: ${l}`} /&gt;
+      &lt;ReferenceLine y={30} stroke="#F59E0B" strokeDasharray="5 5"
+                     label={{ value: 'SLA 30 min', fill: '#F59E0B', fontSize: 12 }} /&gt;
+      &lt;Area type="monotone" dataKey="minutos" stroke="#2196F3" 
+            fill="url(#gradTiempo)" strokeWidth={2}
+            dot={(props) =&gt; {
+              const { cx, cy, payload } = props
+              if (payload.minutos &gt; 30) {
+                return &lt;circle cx={cx} cy={cy} r={5} fill="#EF4444" /&gt;
+              }
+              return &lt;circle cx={cx} cy={cy} r={3} fill="#2196F3" /&gt;
+            }} /&gt;
+    &lt;/AreaChart&gt;
+  &lt;/ResponsiveContainer&gt;
+
+TABLA DETALLE POR LÍNEA:
+  Columnas: Línea | FPY Hoy | FPY Semana | Defectos/Millón | 
+            T.Espera Prom | Estado vs Meta
+
+  Estado vs Meta:
+    fpyHoy &gt;= 0.95 → 
+      &lt;span className="text-green-600"&gt;✓ Cumple (+{diff}%)&lt;/span&gt;
+    fpyHoy &lt; 0.95 → 
+      &lt;span className="text-red-600"&gt;✗ Por debajo ({diff}%)&lt;/span&gt;
+    donde diff = ((fpyHoy - 0.95) * 100).toFixed(1)
+
+════════════════════════════════════════════════
+## ARCHIVO 7: src/data/calidadData.ts
+════════════════════════════════════════════════
+
+(Si no existe, créalo. Si existe y está vacío, reemplázalo)
+
+export const tendenciaTiempoEspera = [
+  { hora: '06:00', minutos: 18 },
+  { hora: '07:00', minutos: 22 },
+  { hora: '08:00', minutos: 35 },
+  { hora: '09:00', minutos: 28 },
+  { hora: '10:00', minutos: 67 },
+  { hora: '11:00', minutos: 87 },
+  { hora: '12:00', minutos: 25 },
+  { hora: '13:00', minutos: 45 },
+  { hora: '14:00', minutos: 32 },
+  { hora: '15:00', minutos: 19 },
+  { hora: '16:00', minutos: 21 },
+  { hora: '17:00', minutos: 14 },
+]
+
+export const inspeccionesEjemplo = [
+  {
+    inspeccionId: 'INS-001',
+    resultados: [
+      { parametro: 'Diámetro exterior', valorMedido: 25.38, valorNominal: 25.4, tolerancia: 0.02, unidad: 'mm', critico: true, aprobado: true },
+      { parametro: 'Dureza superficial', valorMedido: 52, valorNominal: 58, tolerancia: 2, unidad: 'HRC', critico: true, aprobado: false },
+      { parametro: 'Rugosidad Ra', valorMedido: 0.75, valorNominal: 0.8, tolerancia: 0.2, unidad: 'μm', critico: false, aprobado: true },
+      { parametro: 'Presión de prueba', valorMedido: 148, valorNominal: 150, tolerancia: 5, unidad: 'PSI', critico: true, aprobado: true },
+    ]
+  }
+]
+
+════════════════════════════════════════════════
+## VERIFICACIÓN FINAL
+════════════════════════════════════════════════
+
+Después de crear todos los archivos:
+
+1. Verifica que estos imports existen en AppContext:
+   - inspecciones, noConformidades, trazabilidad, indicadores
+   - aprobarInspeccion, rechazarLote
+   Si no existen, agrégalos al contexto.
+
+2. Verifica que calidadData.ts exporta tendenciaTiempoEspera
+
+3. Corre: npm run build
+   Corrige cualquier error de TypeScript o imports antes de continuar.
+
+4. Muestra árbol actualizado de src/app/calidad/ y src/components/calidad/</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#8</span>
+      <span class="prompt-fecha">6/06/2026, 10:38 p. m.</span>
+    </div>
+    <div class="prompt-body">Creating an optimized production build ...
+ ✓ Compiled successfully
+
+Failed to compile.
+
+./src/app/ia/prediccion/page.tsx
+101:67  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+101:89  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+PS C:\Users\donat\Desktop\Siesa&gt;</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#9</span>
+      <span class="prompt-fecha">6/06/2026, 10:39 p. m.</span>
+    </div>
+    <div class="prompt-body">&gt; next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types  ...Failed to compile.
+
+./src/app/manufactura/avance/page.tsx:209:22
+Type error: Type 'Set&lt;string&gt;' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+
+  207 |   const [turnoActivo, setTurnoActivo] = useState&lt;Turno&gt;('Mañana')
+  208 |
+&gt; 209 |   const lineas = [...new Set(ordenes.map((o) =&gt; o.lineaProduccion))].sort()
+      |                      ^
+  210 |
+  211 |   return (
+  212 |     &lt;div className="max-w-[1400px] mx-auto"&gt;
+PS C:\Users\donat\Desktop\Siesa&gt;</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#10</span>
+      <span class="prompt-fecha">6/06/2026, 10:40 p. m.</span>
+    </div>
+    <div class="prompt-body">&gt; siesa-mes@0.1.0 build
+&gt; next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+ ✓ Collecting page data
+ ✓ Generating static pages (18/18)
+ ✓ Collecting build traces
+ ✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    23.4 kB         218 kB
+├ ○ /_not-found                          875 B          88.2 kB
+├ ƒ /api/ia                              0 B                0 B
+├ ○ /calidad/indicadores                 11.6 kB         198 kB
+├ ○ /calidad/inspecciones                10.8 kB         101 kB
+├ ○ /calidad/no-conformidades            6.7 kB         97.4 kB
+├ ○ /calidad/trazabilidad                5.34 kB        96.2 kB
+├ ○ /ia/prediccion                       4.98 kB        95.7 kB
+├ ○ /manufactura/avance                  4.97 kB        95.4 kB
+├ ○ /manufactura/centros-trabajo         3.21 kB        93.6 kB
+├ ○ /manufactura/costeo-rutas            3.12 kB        93.5 kB
+├ ○ /manufactura/estructura-costos       3.6 kB          191 kB
+├ ○ /manufactura/lista-materiales        3.68 kB          91 kB
+├ ○ /manufactura/ordenes                 7.92 kB        98.3 kB
+├ ○ /manufactura/rutas                   3.97 kB        94.4 kB
+└ ○ /manufactura/tiempos                 6.76 kB        97.2 kB
++ First Load JS shared by all            87.3 kB
+  ├ chunks/23-895ae71e5d484f8a.js        31.7 kB
+  ├ chunks/fd9d1056-43fc412c81498651.js  53.6 kB
+  └ other shared chunks (total)          2 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+PS C:\Users\donat\Desktop\Siesa&gt;</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#11</span>
+      <span class="prompt-fecha">6/06/2026, 10:41 p. m.</span>
+    </div>
+    <div class="prompt-body">GET http://localhost:3000/calidad/muestreo 404 (Not Found)
+main-app.js?v=1780803693603:1825 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#12</span>
+      <span class="prompt-fecha">6/06/2026, 10:44 p. m.</span>
+    </div>
+    <div class="prompt-body">revisa todo el modulo de calidad no salen fichas tecnicas, variaciones, entregas prod, trabajo en proceso; recuerda todo debe estar concectado con el modulo de manufactura</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#13</span>
+      <span class="prompt-fecha">7/06/2026, 2:05 a. m.</span>
+    </div>
+    <div class="prompt-body">SIGUE</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#14</span>
+      <span class="prompt-fecha">7/06/2026, 9:52 a. m.</span>
+    </div>
+    <div class="prompt-body">CONECTA TODOS LOS 2 MODULOS Y RECUERDA QUE DEBEN IR CONECTADOS LA LA BASE DE DATOS EN spreadsheets,ADEMAS REVISA SI HAY QUE HACER CRUDS Y COMPLETA TODAS LAS FUNCIONALIDADES QUE FALTAN</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#15</span>
+      <span class="prompt-fecha">7/06/2026, 10:56 a. m.</span>
+    </div>
+    <div class="prompt-body">"C:\Users\donat\Desktop\Siesa MES Preview.html"</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#16</span>
+      <span class="prompt-fecha">7/06/2026, 4:40 p. m.</span>
+    </div>
+    <div class="prompt-body">C:\Users\donat\Desktop\html   en base a este ui/ux copia toda la estetica y recrea en el codigo cambia por completo</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#17</span>
+      <span class="prompt-fecha">7/06/2026, 5:15 p. m.</span>
+    </div>
+    <div class="prompt-body">crea todos los cruds de manofactura y calidad deja el sistema listo para produccion, ademas mejora he integra nuevas herramientas con ia que nos permitan optimizar los procesos</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#18</span>
+      <span class="prompt-fecha">7/06/2026, 8:41 p. m.</span>
+    </div>
+    <div class="prompt-body">continua</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#19</span>
+      <span class="prompt-fecha">7/06/2026, 9:15 p. m.</span>
+    </div>
+    <div class="prompt-body">Unhandled Runtime Error
+Error: Hydration failed because the initial UI does not match what was rendered on the server.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+Did not expect server HTML to contain a &lt;span&gt; in &lt;a&gt;.
+
+
+&lt;a&gt;
+Call Stack
+React</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#20</span>
+      <span class="prompt-fecha">7/06/2026, 9:19 p. m.</span>
+    </div>
+    <div class="prompt-body">entregas-producto revisa la seccion que te permite ver las entgregas la barra latereal que aparece se mira cortado</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#21</span>
+      <span class="prompt-fecha">7/06/2026, 9:21 p. m.</span>
+    </div>
+    <div class="prompt-body">Unhandled Runtime Error
+Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+Call Stack
+React</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#22</span>
+      <span class="prompt-fecha">7/06/2026, 9:59 p. m.</span>
+    </div>
+    <div class="prompt-body">app-index.js:33 Warning: Prop `className` did not match. Server: "relative w-10 h-10 rounded-xl bg-[#F4F7FB] hover:bg-[#EAF2FE] flex items-center justify-center transition-all duration-150  text-[#1F6CF0]" Client: "relative w-10 h-10 rounded-xl bg-[#F4F7FB] hover:bg-[#EAF2FE] flex items-center justify-center transition-all duration-150  text-[#5A6B85]"
+    at button
+    at div
+    at div
+    at header
+    at Header (webpack-internal:///(app-pages-browser)/./src/components/Header.tsx:677:11)
+    at div
+    at div
+    at SidebarWrapper (webpack-internal:///(app-pages-browser)/./src/components/SidebarWrapper.tsx:16:11)
+    at CalidadProvider (webpack-internal:///(app-pages-browser)/./src/context/CalidadContext.tsx:210:11)
+    at ManufacturaProvider (webpack-internal:///(app-pages-browser)/./src/context/ManufacturaContext.tsx:62:11)
+    at AppProvider (webpack-internal:///(app-pages-browser)/./src/context/AppContext.tsx:28:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in &lt;#document&gt;.
+5
+on-recoverable-error.js:20 Uncaught Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at checkForUnmatchedText (react-dom.development.js:32797:11)
+    at diffHydratedProperties (react-dom.development.js:35055:9)
+    at hydrateInstance (react-dom.development.js:36127:3)
+    at prepareToHydrateHostInstance (react-dom.development.js:7246:3)
+    at completeWork (react-dom.development.js:19769:13)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#23</span>
+      <span class="prompt-fecha">7/06/2026, 10:08 p. m.</span>
+    </div>
+    <div class="prompt-body">Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+app-index.js:33 Warning: Text content did not match. Server: "1" Client: "0"
+    at span
+    at div
+    at div
+    at div
+    at KpiCard (webpack-internal:///(app-pages-browser)/./src/app/page.tsx:71:11)
+    at div
+    at div
+    at DashboardPage (webpack-internal:///(app-pages-browser)/./src/app/page.tsx:1754:144)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at main
+    at div
+    at div
+    at SidebarWrapper (webpack-internal:///(app-pages-browser)/./src/components/SidebarWrapper.tsx:16:11)
+    at CalidadProvider (webpack-internal:///(app-pages-browser)/./src/context/CalidadContext.tsx:210:11)
+    at ManufacturaProvider (webpack-internal:///(app-pages-browser)/./src/context/ManufacturaContext.tsx:62:11)
+    at AppProvider (webpack-internal:///(app-pages-browser)/./src/context/AppContext.tsx:28:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+window.console.error @ app-index.js:33
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in &lt;#document&gt;.
+window.console.error @ app-index.js:33
+5on-recoverable-error.js:20 Uncaught Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at checkForUnmatchedText (react-dom.development.js:32797:11)
+    at diffHydratedProperties (react-dom.development.js:35055:9)
+    at hydrateInstance (react-dom.development.js:36127:3)
+    at prepareToHydrateHostInstance (react-dom.development.js:7246:3)
+    at completeWork (react-dom.development.js:19769:13)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+hot-reloader-client.js:187 [Fast Refresh] rebuilding
+hot-reloader-client.js:44 [Fast Refresh] done in 251ms</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#24</span>
+      <span class="prompt-fecha">7/06/2026, 10:18 p. m.</span>
+    </div>
+    <div class="prompt-body">app-index.js:33 Warning: Text content did not match. Server: "En Proceso" Client: "Completada"
+    at span
+    at td
+    at tr
+    at tbody
+    at table
+    at div
+    at div
+    at TablaOrdenes (webpack-internal:///(app-pages-browser)/./src/app/page.tsx:1024:121)
+    at div
+    at DashboardPage (webpack-internal:///(app-pages-browser)/./src/app/page.tsx:1754:144)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at main
+    at div
+    at div
+    at SidebarWrapper (webpack-internal:///(app-pages-browser)/./src/components/SidebarWrapper.tsx:16:11)
+    at CalidadProvider (webpack-internal:///(app-pages-browser)/./src/context/CalidadContext.tsx:210:11)
+    at ManufacturaProvider (webpack-internal:///(app-pages-browser)/./src/context/ManufacturaContext.tsx:62:11)
+    at AppProvider (webpack-internal:///(app-pages-browser)/./src/context/AppContext.tsx:28:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in &lt;#document&gt;.
+5
+on-recoverable-error.js:20 Uncaught Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at checkForUnmatchedText (react-dom.development.js:32797:11)
+    at diffHydratedProperties (react-dom.development.js:35055:9)
+    at hydrateInstance (react-dom.development.js:36127:3)
+    at prepareToHydrateHostInstance (react-dom.development.js:7246:3)
+    at completeWork (react-dom.development.js:19769:13)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+﻿
+
+1 of 1 error
+Next.js (14.2.5) is outdated (learn more)
+
+Unhandled Runtime Error
+Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+
+Text content did not match. Server: "En Proceso" Client: "Completada"
+
+
+...
+  &lt;div&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;
+            &lt;span&gt;
+              "En Proceso"
+              "Completada"
+Call Stack
+React</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#25</span>
+      <span class="prompt-fecha">7/06/2026, 10:26 p. m.</span>
+    </div>
+    <div class="prompt-body">conectemos la base de datos de spreadsheets</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#26</span>
+      <span class="prompt-fecha">7/06/2026, 11:10 p. m.</span>
+    </div>
+    <div class="prompt-body">https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/api/sheets/[tabla]/route.ts
+ GET /api/sheets/muestras 500 in 5083ms
+ GET /api/sheets/registrosTiempos 500 in 5084ms
+ GET /api/sheets/alertas 500 in 5083ms
+ GET /api/sheets/ordenes 500 in 5084ms
+ GET /api/sheets/noConformidades 500 in 5086ms
+ GET /api/sheets/inspecciones 500 in 5085ms
+ GET /api/sheets/muestras 500 in 69ms
+ GET /api/sheets/registrosTiempos 500 in 68ms
+ GET /api/sheets/alertas 500 in 67ms
+ GET /api/sheets/ordenes 500 in 67ms
+ GET /api/sheets/noConformidades 500 in 67ms
+ GET /api/sheets/inspecciones 500 in 144ms
+ GET /_next/static/webpack/17310863e7c400da.webpack.hot-update.json 500 in 35ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 500 in 71ms
+&lt;w&gt; [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz_' -&gt; 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz'
+&lt;w&gt; [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz_' -&gt; 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz'
+&lt;w&gt; [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz_' -&gt; 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz'
+&lt;w&gt; [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz_' -&gt; 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz'
+&lt;w&gt; [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz_' -&gt; 'C:\Users\donat\Desktop\Siesa\.next\cache\webpack\client-development-fallback\0.pack.gz'</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#27</span>
+      <span class="prompt-fecha">8/06/2026, 12:45 a. m.</span>
+    </div>
+    <div class="prompt-body">Build Error
+Failed to compile
+
+Next.js (14.2.5) is outdated (learn more)
+./src/lib/googleSheets.ts:1:1
+Module not found: Can't resolve 'googleapis'
+&gt; 1 | import { google } from 'googleapis'
+    | ^
+  2 |
+  3 | // ─── CLIENTE ──────────────────────────────────────────────────────────────────
+  4 |
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/app/api/sheets/[tabla]/route.ts
+This error occurred during the build process and can only be dismissed by fixing the error.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#28</span>
+      <span class="prompt-fecha">8/06/2026, 1:33 a. m.</span>
+    </div>
+    <div class="prompt-body">app-index.js:33 Warning: Text content did not match. Server: "4" Client: "3"
+    at button
+    at div
+    at div
+    at div
+    at OrdenesPage (webpack-internal:///(app-pages-browser)/./src/app/manufactura/ordenes/page.tsx:558:165)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at main
+    at div
+    at div
+    at SidebarWrapper (webpack-internal:///(app-pages-browser)/./src/components/SidebarWrapper.tsx:16:11)
+    at CalidadProvider (webpack-internal:///(app-pages-browser)/./src/context/CalidadContext.tsx:212:11)
+    at ManufacturaProvider (webpack-internal:///(app-pages-browser)/./src/context/ManufacturaContext.tsx:64:11)
+    at AppProvider (webpack-internal:///(app-pages-browser)/./src/context/AppContext.tsx:30:11)
+    at body
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+app-index.js:33 Warning: An error occurred during hydration. The server HTML was replaced with client content in &lt;#document&gt;.
+7
+on-recoverable-error.js:20 Uncaught Error: Text content does not match server-rendered HTML.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at checkForUnmatchedText (react-dom.development.js:32797:11)
+    at didNotMatchHydratedTextInstance (react-dom.development.js:36222:5)
+    at prepareToHydrateHostTextInstance (react-dom.development.js:7288:13)
+    at completeWork (react-dom.development.js:19821:17)
+    at completeUnitOfWork (react-dom.development.js:25963:14)
+    at performUnitOfWork (react-dom.development.js:25759:5)
+    at workLoopConcurrent (react-dom.development.js:25734:5)
+    at renderRootConcurrent (react-dom.development.js:25690:9)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:38)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+react-dom.development.js:16571 Uncaught Error: There was an error while hydrating. Because the error happened outside of a Suspense boundary, the entire root will switch to client rendering.
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+    at updateHostRoot (react-dom.development.js:16571:57)
+    at beginWork$1 (react-dom.development.js:18486:14)
+    at beginWork (react-dom.development.js:26927:14)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+:3000/api/sheets/noConformidades:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/inspecciones:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/registrosTiempos:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/ordenes:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/muestras:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/alertas:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/noConformidades:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/inspecciones:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/registrosTiempos:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/ordenes:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/muestras:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/sheets/alertas:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#29</span>
+      <span class="prompt-fecha">8/06/2026, 1:36 a. m.</span>
+    </div>
+    <div class="prompt-body">ya tengo el JSON de la cuenta de servicio</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#30</span>
+      <span class="prompt-fecha">8/06/2026, 1:41 a. m.</span>
+    </div>
+    <div class="prompt-body">reinicia el servidor y prueba la conexión</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#31</span>
+      <span class="prompt-fecha">8/06/2026, 1:42 a. m.</span>
+    </div>
+    <div class="prompt-body">prueba en http://localhost:3000/api/sheets/status</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#32</span>
+      <span class="prompt-fecha">8/06/2026, 1:43 a. m.</span>
+    </div>
+    <div class="prompt-body">{"ok":false,"mensaje":"Credenciales no configuradas o incompletas","detalle":{"spreadsheetId":"✓","email":"✓","privateKey":"✗ tiene valor pero no es una clave PEM (debe empezar con -----BEGIN PRIVATE KEY-----)"}}</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#33</span>
+      <span class="prompt-fecha">8/06/2026, 1:47 a. m.</span>
+    </div>
+    <div class="prompt-body">solo puedo sacar la api_key</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#34</span>
+      <span class="prompt-fecha">8/06/2026, 1:50 a. m.</span>
+    </div>
+    <div class="prompt-body">siesa-498803-68d6760ca299.json</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#35</span>
+      <span class="prompt-fecha">8/06/2026, 1:59 a. m.</span>
+    </div>
+    <div class="prompt-body">{"ok":false,"mensaje":"Error al conectar","error":"This operation is not supported for this document. The document must not be an Office file."}</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#36</span>
+      <span class="prompt-fecha">8/06/2026, 2:03 a. m.</span>
+    </div>
+    <div class="prompt-body">{"ok":false,"mensaje":"Error al conectar","error":"Unable to parse range: ordenes!A:ZZ"}</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#37</span>
+      <span class="prompt-fecha">8/06/2026, 2:05 a. m.</span>
+    </div>
+    <div class="prompt-body">{"ok":true,"mensaje":"Conexión exitosa con Google Sheets","spreadsheetId":"1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY","email":"siesa-18@siesa-498803.iam.gserviceaccount.com"}</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#38</span>
+      <span class="prompt-fecha">8/06/2026, 2:06 a. m.</span>
+    </div>
+    <div class="prompt-body">ya esta conectado con la base?</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#39</span>
+      <span class="prompt-fecha">8/06/2026, 2:07 a. m.</span>
+    </div>
+    <div class="prompt-body">revisa todo el flujo completo del sistema y dame la los datos para la migracion inicial de toda los campos de la base</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#40</span>
+      <span class="prompt-fecha">8/06/2026, 2:12 a. m.</span>
+    </div>
+    <div class="prompt-body">prueba la migración en el navegador</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#41</span>
+      <span class="prompt-fecha">8/06/2026, 2:16 a. m.</span>
+    </div>
+    <div class="prompt-body">PS C:\Users\donat\Desktop\Siesa&gt;
+                               &gt; fetch('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then(console.log)
+En línea: 1 Carácter: 55
++ fetch('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()). ...
++                                                       ~
+Falta el paréntesis de cierre ')' en la llamada al método.
+En línea: 1 Carácter: 67
++ ... ('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then( ...
++                                                                  ~
+Se esperaba una expresión después de '('.
+En línea: 1 Carácter: 68
++ ... /api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then(co ...
++                                                                 ~
+Token ')' inesperado en la expresión o la instrucción.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingEndParenthesisInMethodCall
+
+PS C:\Users\donat\Desktop\Siesa&gt;</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#42</span>
+      <span class="prompt-fecha">8/06/2026, 2:18 a. m.</span>
+    </div>
+    <div class="prompt-body">fetch('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then(console.log)
+Promise {&lt;pending&gt;}[[Prototype]]: Promise[[PromiseState]]: "rejected"[[PromiseResult]]: TypeError: Failed to fetch
+    at &lt;anonymous&gt;:1:1
+VM24942:1  POST http://localhost:3000/api/sheets/migrate net::ERR_CONNECTION_REFUSED
+(anonymous) @ VM24942:1
+VM24942:1  Uncaught (in promise) TypeError: Failed to fetch
+    at &lt;anonymous&gt;:1:1
+(anonymous) @ VM24942:1</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#43</span>
+      <span class="prompt-fecha">8/06/2026, 2:20 a. m.</span>
+    </div>
+    <div class="prompt-body">etch('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then(console.log)
+Promise {&lt;pending&gt;}
+{ok: true, totalMigrados: 9, tablas: {…}}ok: truetablas: {ordenes: {…}, muestras: {…}, alertas: {…}, inspecciones: {…}, noConformidades: {…}, …}totalMigrados: 9[[Prototype]]: Object</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#44</span>
+      <span class="prompt-fecha">8/06/2026, 2:25 a. m.</span>
+    </div>
+    <div class="prompt-body">fetch('/api/sheets/migrate', { method: 'POST' }).then(r =&gt; r.json()).then(r =&gt;
+  console.table(Object.entries(r.tablas).map(([t,v]) =&gt; ({tabla: t, ...v}))))
+Promise {&lt;pending&gt;}
+[[Prototype]]
+: 
+Promise
+[[PromiseState]]
+: 
+"fulfilled"
+[[PromiseResult]]
+: 
+undefined
+VM25262:2 
+(index)
+tabla
+migrados
+omitidos
+estado
+0    'ordenes'    0    4    'ya_tenía_datos'
+1    'muestras'    0    1    'ya_tenía_datos'
+2    'alertas'    0    4    'ya_tenía_datos'
+3    'inspecciones'    0    1    'ya_tenía_datos'
+4    'noConformidades'    0    1    'ya_tenía_datos'
+5    'fichas'    0    2    'ya_tenía_datos'
+6    'registrosTiempos'    0    0    'migrado'
+Array(7)</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#45</span>
+      <span class="prompt-fecha">8/06/2026, 2:25 a. m.</span>
+    </div>
+    <div class="prompt-body">REVISA TODO EL FLUJO DEJA LISTO PARA PRODUCCION</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#46</span>
+      <span class="prompt-fecha">8/06/2026, 8:28 a. m.</span>
+    </div>
+    <div class="prompt-body">revisa la base de datos y crea todo lo necesario, haz que dependa 100% de la informacion de spreadsheets</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#47</span>
+      <span class="prompt-fecha">8/06/2026, 8:48 a. m.</span>
+    </div>
+    <div class="prompt-body">pero spreadsheets</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#48</span>
+      <span class="prompt-fecha">8/06/2026, 9:15 a. m.</span>
+    </div>
+    <div class="prompt-body">la base de datos sigue sin concectase no se muestran los datos de la base y no se actualiza nada en el spreadsheets</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#49</span>
+      <span class="prompt-fecha">8/06/2026, 10:11 a. m.</span>
+    </div>
+    <div class="prompt-body">https://docs.google.com/spreadsheets/d/1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY/edit?usp=sharing  revisa la base de datos y elimina, ajusta las hojas elemina las que no se usan y ordena los datos como una base de datos real</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#50</span>
+      <span class="prompt-fecha">8/06/2026, 10:31 a. m.</span>
+    </div>
+    <div class="prompt-body">corrige las funcionalidades con ia y agrega muchas mas</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#51</span>
+      <span class="prompt-fecha">8/06/2026, 10:53 a. m.</span>
+    </div>
+    <div class="prompt-body">Asistente de Calidad IA
+
+Describe el defecto en tus propias palabras
+
+SIESA AI
+"El diámetro está un poco grande, como que la máquina torneó de más, se nota al tacto..."
+Dictar
+Analizar con IArevisa la ia de inspeccion y porque me sale offine si tengo todas las claves</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#52</span>
+      <span class="prompt-fecha">8/06/2026, 11:03 a. m.</span>
+    </div>
+    <div class="prompt-body">Error al llamar a Gemini API
+
+API_ERROR:429:{ "error": { "code": 429, "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\nPlease retry in 45.011228232s.", "status": "RESOURCE_EXHAUSTED", "details": [ { "@type": "type.googleapis.com/google.rpc.Help", "links": [ { "description": "Learn more about Gemini API quotas", "url": "https://ai.google.dev/gemini-api/docs/rate-limits" } ] }, { "@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": [ { "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count", "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier", "quotaDimensions": { "model": "gemini-2.0-flash", "location": "global" } }, { "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests", "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier", "quotaDimensions": { "model": "gemini-2.0-flash", "location": "global" } }, { "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests", "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier", "quotaDimensions": { "model": "gemini-2.0-flash", "location": "global" } } ] }, { "@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "45s" } ] } }
+
+La clave Gemini debe empezar con AIza. Obtén una en aistudio.google.com/app/apikey y reemplaza GEMINI_API_KEY en .env.local.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#53</span>
+      <span class="prompt-fecha">8/06/2026, 11:09 a. m.</span>
+    </div>
+    <div class="prompt-body">Cuota agotada — límite gratuito de Gemini alcanzado. Reintenta en ~59s. Análisis generado con lógica local.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#54</span>
+      <span class="prompt-fecha">8/06/2026, 11:26 a. m.</span>
+    </div>
+    <div class="prompt-body">Análisis offline — Gemini no disponible. Lógica local aplicada  revisa todos los modelos de ia para que esten funcionando y de lo contrario reporten el error</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#55</span>
+      <span class="prompt-fecha">8/06/2026, 11:36 a. m.</span>
+    </div>
+    <div class="prompt-body">siempre sale cuota agotada aunque no lo he usado</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#56</span>
+      <span class="prompt-fecha">8/06/2026, 11:48 a. m.</span>
+    </div>
+    <div class="prompt-body">Cuota por minuto agotada — reintenta en ~60s
+
+Key: AQ.Ab8RN…u7JA· Verificado: 11:47:55 a. m.
+
+Repetir
+0
+
+OK
+
+2
+
+Cuota
+
+3
+
+No disp.
+
+0
+
+Error
+
+Estado por modelo (5 verificados)
+
+gemini-1.5-flash-8b
+No disponible
+HTTP 404
+Modelo no disponible o deprecado
+
+
+gemini-1.5-flash
+No disponible
+HTTP 404
+Modelo no disponible o deprecado
+
+
+gemini-1.5-flash-latest
+No disponible
+HTTP 404
+Modelo no disponible o deprecado
+
+
+gemini-2.0-flash-lite
+Cuota por minuto
+HTTP 429
+Cuota por minuto agotada — reintenta en 4s
+
+Reintenta en ~4s
+
+
+gemini-2.0-flash
+Cuota por minuto
+HTTP 429
+Cuota por minuto agotada — reintenta en 3s
+
+Reintenta en ~3s
+
+
+Guía de solución de problemas
+
+1. Sin API Key: Abre .env.local y agrega GEMINI_API_KEY=tu-clave
+
+2. Clave inválida: Ve a aistudio.google.com → Get API Key → crea o copia tu clave
+
+3. Cuota agotada: El free tier tiene límites por minuto. Espera 60s y reintenta, o activa facturación en console.cloud.google.com
+
+4. Sin conexión: Verifica acceso a internet desde el servidor. En redes corporativas puede haber proxy bloqueando googleapis.com
+
+Mientras la IA no esté disponible, todos los análisis usan lógica local con los datos reales de planta.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#57</span>
+      <span class="prompt-fecha">8/06/2026, 11:53 a. m.</span>
+    </div>
+    <div class="prompt-body">Diagnóstico de Modelos IA
+Verifica qué modelos Gemini están disponibles para tu API key
+
+Cuota por minuto agotada — reintenta en ~60s
+
+Key: AQ.Ab8RN…u7JA· Verificado: 11:53:01 a. m.
+
+Repetir
+0
+
+OK
+
+2
+
+Cuota
+
+1
+
+No disp.
+
+1
+
+Error
+
+Estado por modelo (4 verificados)
+
+gemini-1.5-flash-8b
+v1
+Sin conexión
+Sin respuesta del servidor de Google
+
+
+gemini-1.5-flash
+v1
+No disponible
+HTTP 404
+No disponible en v1
+
+
+gemini-2.0-flash-lite
+v1beta
+Cuota por minuto
+HTTP 429
+Cuota por minuto — reintenta en 65s
+
+Reintenta en ~65s
+
+
+gemini-2.0-flash
+v1beta
+Cuota por minuto
+HTTP 429
+Cuota por minuto — reintenta en 65s
+
+Reintenta en ~65s
+
+
+Guía de solución de problemas
+
+1. Sin API Key: Abre .env.local y agrega GEMINI_API_KEY=tu-clave
+
+2. Clave inválida: Ve a aistudio.google.com → Get API Key → crea o copia tu clave
+
+3. Cuota agotada: El free tier tiene límites por minuto. Espera 60s y reintenta, o activa facturación en console.cloud.google.com
+
+4. Sin conexión: Verifica acceso a internet desde el servidor. En redes corporativas puede haber proxy bloqueando googleapis.com
+
+Mientras la IA no esté disponible, todos los análisis usan lógica local con los datos reales de planta.</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#58</span>
+      <span class="prompt-fecha">8/06/2026, 3:29 p. m.</span>
+    </div>
+    <div class="prompt-body">sigue</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#59</span>
+      <span class="prompt-fecha">8/06/2026, 3:52 p. m.</span>
+    </div>
+    <div class="prompt-body">Analizar Riesgo de Producción
+Analiza 5 órdenes activas y 3 indicadores en tiempo real para detectar riesgos de fallo de calidad antes de que ocurran.
+
+Error de conexión con Gemini
+
+Unterminated string in JSON at position 156 (line 7 column 37)</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#60</span>
+      <span class="prompt-fecha">8/06/2026, 3:55 p. m.</span>
+    </div>
+    <div class="prompt-body">INS-1780951908069-bp8q
+Pistón Motor 4L-200 · LOT-C-004
+
+
+Orden
+
+OP-2024-004
+
+Lote
+
+LOT-C-004
+
+Línea
+
+Línea C
+
+Operario
+
+Miguel Torres
+
+Tiempo en cola
+3 min
+Inspector
+
+
+Seleccionar inspector…
+Asignar
+Medición de parámetros — Válvula de Escape XR-500
+
+Asistente de Calidad IA
+
+Describe el defecto en tus propias palabras
+
+SIESA AI
+"El diámetro está un poco grande, como que la máquina torneó de más, se nota al tacto..."
+Dictar
+Analizar con IA
+Medición de parámetros
+
+Diámetro exterior
+
+ corrige la funcion de dictar</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#61</span>
+      <span class="prompt-fecha">8/06/2026, 3:58 p. m.</span>
+    </div>
+    <div class="prompt-body">prueba el dictado</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#62</span>
+      <span class="prompt-fecha">8/06/2026, 4:02 p. m.</span>
+    </div>
+    <div class="prompt-body">funciona bien, ahora corre las pruebas de manufactura y calidad</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#63</span>
+      <span class="prompt-fecha">8/06/2026, 4:10 p. m.</span>
+    </div>
+    <div class="prompt-body">haz commit de los cambios</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#64</span>
+      <span class="prompt-fecha">8/06/2026, 4:15 p. m.</span>
+    </div>
+    <div class="prompt-body">https://vercel.com/ publica en linea</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#65</span>
+      <span class="prompt-fecha">8/06/2026, 4:22 p. m.</span>
+    </div>
+    <div class="prompt-body">16:20:08.540 Running build in Washington, D.C., USA (East) – iad1
+16:20:08.540 Build machine configuration: 2 cores, 8 GB
+16:20:08.657 Cloning github.com/DonatoNicolasAyalaOsorio73/Siesa (Branch: main, Commit: ca87153)
+16:20:08.658 Previous build caches not available.
+16:20:09.023 Cloning completed: 365.000ms
+16:20:09.272 Running "vercel build"
+16:20:09.291 Vercel CLI 54.9.0
+16:20:09.509 Running "install" command: `npm install`...
+16:20:12.107 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+16:20:12.520 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+16:20:13.743 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+16:20:13.794 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+16:20:13.812 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+16:20:14.957 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+16:20:15.066 npm warn deprecated glob@10.3.10: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+16:20:19.290 npm warn deprecated recharts@2.15.4: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
+16:20:19.791 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+16:20:59.541 npm warn deprecated next@14.2.5: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
+16:20:59.831 
+16:20:59.832 added 506 packages, and audited 507 packages in 50s
+16:20:59.832 
+16:20:59.832 171 packages are looking for funding
+16:20:59.832   run `npm fund` for details
+16:21:00.044 
+16:21:00.044 12 vulnerabilities (5 moderate, 6 high, 1 critical)
+16:21:00.046 
+16:21:00.046 To address issues that do not require attention, run:
+16:21:00.046   npm audit fix
+16:21:00.046 
+16:21:00.046 To address all issues (including breaking changes), run:
+16:21:00.046   npm audit fix --force
+16:21:00.046 
+16:21:00.046 Run `npm audit` for details.
+16:21:00.119 Detected Next.js version: 14.2.5
+16:21:00.121 Running "npm run build"
+16:21:00.234 
+16:21:00.235 &gt; siesa-mes@0.1.0 build
+16:21:00.235 &gt; next build
+16:21:00.235 
+16:21:00.805 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+16:21:00.805 This information is used to shape Next.js' roadmap and prioritize features.
+16:21:00.806 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+16:21:00.806 https://nextjs.org/telemetry
+16:21:00.806 
+16:21:00.860   ▲ Next.js 14.2.5
+16:21:00.862 
+16:21:00.883    Creating an optimized production build ...
+16:21:40.744  ✓ Compiled successfully
+16:21:40.746    Linting and checking validity of types ...
+16:21:47.360 
+16:21:47.360 Failed to compile.
+16:21:47.361 
+16:21:47.361 ./src/app/ia/estado/page.tsx
+16:21:47.361 262:28  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+16:21:47.362 262:42  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+16:21:47.362 328:260  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+16:21:47.363 328:275  Error: `"` can be escaped with `&amp;quot;`, `&amp;ldquo;`, `&amp;#34;`, `&amp;rdquo;`.  react/no-unescaped-entities
+16:21:47.365 
+16:21:47.366 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+16:21:47.412 Error: Command "npm run build" exited with 1</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#66</span>
+      <span class="prompt-fecha">8/06/2026, 4:30 p. m.</span>
+    </div>
+    <div class="prompt-body">ya esta en linea corrige las notificaciones, y revisa el flujo y concecion que deben tener manofactura y calidad</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#67</span>
+      <span class="prompt-fecha">8/06/2026, 4:36 p. m.</span>
+    </div>
+    <div class="prompt-body">revisa que todo funcione bien en producción todo debe ser mediante Sheets nada en memoria</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#68</span>
+      <span class="prompt-fecha">8/06/2026, 4:53 p. m.</span>
+    </div>
+    <div class="prompt-body">prueba que el BOM nuevo se guarda al recargar</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#69</span>
+      <span class="prompt-fecha">8/06/2026, 4:58 p. m.</span>
+    </div>
+    <div class="prompt-body">despliega en vercel</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#70</span>
+      <span class="prompt-fecha">8/06/2026, 5:16 p. m.</span>
+    </div>
+    <div class="prompt-body">quiero exportar toda nuestra conversacion y todos los promts que te mande</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#71</span>
+      <span class="prompt-fecha">8/06/2026, 5:19 p. m.</span>
+    </div>
+    <div class="prompt-body">como pdf</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#72</span>
+      <span class="prompt-fecha">8/06/2026, 5:23 p. m.</span>
+    </div>
+    <div class="prompt-body">perfecto solo corrige algunas letras salen raras MediciÃ³n de parÃ¡metros</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#73</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">sigue</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#74</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">Analizar Riesgo de Producción — Error de conexión con Gemini / Unterminated string in JSON at position 156</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#75</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">INS-1780951908069-bp8q — corrige la funcion de dictar</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#76</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">prueba el dictado</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#77</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">funciona bien, ahora corre las pruebas de manufactura y calidad</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#78</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">haz commit de los cambios</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#79</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">https://vercel.com/ publica en linea</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#80</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">ya esta en linea corrige las notificaciones, y revisa el flujo y concecion que deben tener manofactura y calidad</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#81</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">revisa que todo funcione bien en producción todo debe ser mediante Sheets nada en memoria</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#82</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">prueba que el BOM nuevo se guarda al recargar</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#83</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">despliega en vercel</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#84</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">quiero exportar toda nuestra conversacion y todos los promts que te mande</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#85</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">como pdf</div>
+  </div>
+
+  <div class="prompt">
+    <div class="prompt-header">
+      <span class="prompt-num">#86</span>
+      <span class="prompt-fecha">2026-06-06/08</span>
+    </div>
+    <div class="prompt-body">perfecto solo corrige algunas letras salen raras MediciÃ³n de parÃ¡metros</div>
+  </div>
+
+  <div class="footer">
+    Siesa MES &nbsp;·&nbsp; Exportado el 8 de junio de 2026 &nbsp;·&nbsp; 86 prompts &nbsp;·&nbsp; Desarrollado con Claude Sonnet 4.6
+  </div>
+</div>
+</body>
+</html>
