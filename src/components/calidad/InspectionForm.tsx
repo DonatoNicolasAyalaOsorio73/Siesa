@@ -140,20 +140,22 @@ export default function InspectionForm({ parametros, onResultadosChange, context
   }
 
   // ── Web Speech API ──
-  // iniciarReconocimiento se llama también desde onend para auto-reiniciar
-  // cuando Chrome para automáticamente por silencio (continuous=true no lo evita en Chrome).
+  // Patrón fiable para Chrome: continuous=false + reinicio manual en onend.
+  // Con continuous=true Chrome a veces despacha onend antes de consolidar
+  // el resultado final, haciendo que el transcript se pierda en el reinicio.
   const iniciarReconocimiento = useCallback(() => {
     const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const rec = new SpeechRec()
-    // es-CO primero; el navegador usa es-ES si no tiene es-CO disponible
-    rec.lang = navigator.language.startsWith('es') ? navigator.language : 'es-CO'
-    rec.continuous = true
+    rec.lang = 'es-CO'
+    rec.continuous = false      // Chrome finaliza cada frase correctamente
     rec.interimResults = true
+    rec.maxAlternatives = 1
 
     rec.onresult = (e: any) => {
       let finalText = ''
       let interino = ''
-      for (let i = e.resultIndex; i < e.results.length; i++) {
+      // Con continuous=false cada sesión tiene sus propios resultados desde 0
+      for (let i = 0; i < e.results.length; i++) {
         if (e.results[i].isFinal) {
           finalText += e.results[i][0].transcript + ' '
         } else {
@@ -161,9 +163,9 @@ export default function InspectionForm({ parametros, onResultadosChange, context
         }
       }
       if (finalText.trim()) {
-        setMensajeOperario((prev) => (prev ? prev.trimEnd() + ' ' + finalText.trimEnd() : finalText.trimEnd()))
+        setMensajeOperario((prev) => (prev ? prev.trimEnd() + ' ' + finalText.trim() : finalText.trim()))
         setTextoInterino('')
-      } else {
+      } else if (interino) {
         setTextoInterino(interino)
       }
     }
@@ -175,14 +177,18 @@ export default function InspectionForm({ parametros, onResultadosChange, context
         setTextoInterino('')
         setIaError('Permiso de micrófono denegado. Actívalo en la barra de dirección del navegador (ícono de candado o micrófono).')
       }
-      // 'no-speech', 'audio-capture', 'network' → onend reiniciará si dictandoRef sigue en true
+      // 'no-speech' → onend se dispara igual; reiniciamos si dictandoRef sigue en true
     }
 
     rec.onend = () => {
       setTextoInterino('')
       if (dictandoRef.current) {
-        // Chrome para automáticamente por silencio — reiniciamos para mantener el micrófono activo
-        try { iniciarReconocimiento() } catch { dictandoRef.current = false; setDictando(false) }
+        // Esperar 150ms para que Chrome libere el micrófono antes de reiniciar
+        setTimeout(() => {
+          if (dictandoRef.current) {
+            try { iniciarReconocimiento() } catch { dictandoRef.current = false; setDictando(false) }
+          }
+        }, 150)
       } else {
         setDictando(false)
       }
@@ -299,17 +305,22 @@ export default function InspectionForm({ parametros, onResultadosChange, context
             className="w-full rounded-lg border border-[#E8EDF4] px-3 py-2.5 text-sm text-[#15233B] outline-none resize-none focus:border-[#6E56E0] focus:ring-1 focus:ring-[#6E56E0]/25 placeholder:text-[#D1D5DB] font-normal"
           />
 
-          {/* Indicador de texto en tiempo real */}
+          {/* Indicador de dictado en tiempo real */}
           {dictando && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#EF4444]/8 border border-[#EF4444]/20">
-              <span className="inline-flex gap-[3px] items-end h-3">
-                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '0ms' }} />
-                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '70%', animationDelay: '150ms' }} />
-                <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '300ms' }} />
-              </span>
-              <span className="text-xs text-[#DC2626] font-medium">
-                {textoInterino ? <em className="not-italic">{textoInterino}</em> : 'Escuchando…'}
-              </span>
+            <div className="rounded-lg border border-[#EF4444]/20 bg-[#FFF5F5] px-3 py-2 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex gap-[3px] items-end h-3 flex-shrink-0">
+                  <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '0ms' }} />
+                  <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '60%', animationDelay: '150ms' }} />
+                  <span className="w-[3px] bg-[#EF4444] rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '300ms' }} />
+                </span>
+                <span className="text-[11px] text-[#DC2626] font-semibold tracking-wide uppercase">
+                  Escuchando — habla claro cerca del micrófono
+                </span>
+              </div>
+              {textoInterino && (
+                <p className="text-sm text-[#5A6B85] italic pl-5 leading-snug">{textoInterino}…</p>
+              )}
             </div>
           )}
 
