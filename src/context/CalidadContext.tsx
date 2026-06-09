@@ -198,8 +198,10 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (cargando || appCargando || ncAlertasSintetizadas.current) return
     ncAlertasSintetizadas.current = true
+    let dismissed = new Set<string>()
+    try { dismissed = new Set(JSON.parse(localStorage.getItem('dismissedSynAlerts') ?? '[]') as string[]) } catch { /* ignore */ }
     noConformidadesRef.current
-      .filter((nc) => nc.estadoCierre !== 'CERRADA')
+      .filter((nc) => nc.estadoCierre !== 'CERRADA' && !dismissed.has(`SYN-NC-${nc.id}`))
       .forEach((nc) =>
         crearAlertaLocal(
           { tipo: 'NC_CREADA', mensaje: `NC ${nc.id} abierta — ${nc.severidad}`, detalle: `${nc.tipoDefecto} · Orden ${nc.ordenId}`, ordenId: nc.ordenId, loteId: nc.loteId, link: '/calidad/no-conformidades', modulo: 'CALIDAD' },

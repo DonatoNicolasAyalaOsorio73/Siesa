@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { inicializarHoja, leerHoja, agregarFilas } from '@/lib/googleSheets'
 import { ordenesIniciales, muestrasIniciales, alertasIniciales, fichasTecnicas, centrosTrabajo, rutas } from '@/data/mockData'
