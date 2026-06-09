@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAppContext } from '@/context/AppContext'
+import { useCalidadContext } from '@/context/CalidadContext'
 import { useEffect, useState } from 'react'
 import {
   Factory, GitBranch, Settings, Package, DollarSign, Calculator,
@@ -33,7 +34,7 @@ const manufacturaItems: NavItem[] = [
 ]
 
 const calidadItems: NavItem[] = [
-  { icon: RefreshCw,      label: 'Trabajo en Proceso',       href: '/calidad/trabajo-proceso',  badge: 'ordenes' },
+  { icon: RefreshCw,      label: 'Trabajo en Proceso',       href: '/calidad/trabajo-proceso',  badge: 'alertas' },
   { icon: ClipboardCheck, label: 'Inspecciones',             href: '/calidad/inspecciones',     badge: 'inspeccion' },
   { icon: FlaskConical,   label: 'Muestreo',                 href: '/calidad/muestreo' },
   { icon: AlertTriangle,  label: 'No Conformidades',         href: '/calidad/no-conformidades' },
@@ -128,12 +129,14 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const { ordenes, ordenesConInspeccionPendiente, alertas } = useAppContext()
+  const { ordenes, alertas } = useAppContext()
+  const { inspecciones } = useCalidadContext()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const ordenesActivas      = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
-  const inspeccionesPendientes = mounted ? ordenesConInspeccionPendiente.length : 0
+  const ordenesActivas         = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
+  const inspeccionesPendientes = mounted ? inspecciones.filter((i) => i.estado === 'PENDIENTE').length : 0
+  const inspeccionesActivas    = mounted ? inspecciones.filter((i) => i.estado === 'EN_PROCESO').length : 0
   const sinLeer         = mounted ? alertas.filter((a) => !a.leida).length : 0
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
@@ -203,6 +206,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               isActive={isActive(item.href)}
               badgeValue={
                 item.badge === 'inspeccion' ? inspeccionesPendientes :
+                item.badge === 'alertas'    ? inspeccionesActivas :
                 item.badge === 'ordenes'    ? ordenesActivas :
                 undefined
               }
