@@ -17,7 +17,7 @@ interface NavItem {
   icon: React.ElementType
   label: string
   href: string
-  badge?: 'ordenes' | 'alertas'
+  badge?: 'ordenes' | 'alertas' | 'inspeccion'
   mod?: 'ia'
 }
 
@@ -33,8 +33,8 @@ const manufacturaItems: NavItem[] = [
 ]
 
 const calidadItems: NavItem[] = [
-  { icon: RefreshCw,      label: 'Trabajo en Proceso',       href: '/calidad/trabajo-proceso',  badge: 'alertas' },
-  { icon: ClipboardCheck, label: 'Inspecciones',             href: '/calidad/inspecciones',     badge: 'alertas' },
+  { icon: RefreshCw,      label: 'Trabajo en Proceso',       href: '/calidad/trabajo-proceso',  badge: 'ordenes' },
+  { icon: ClipboardCheck, label: 'Inspecciones',             href: '/calidad/inspecciones',     badge: 'inspeccion' },
   { icon: FlaskConical,   label: 'Muestreo',                 href: '/calidad/muestreo' },
   { icon: AlertTriangle,  label: 'No Conformidades',         href: '/calidad/no-conformidades' },
   { icon: FileText,       label: 'Fichas Técnicas',          href: '/calidad/fichas-tecnicas' },
@@ -132,8 +132,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  const ordenesActivas  = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
-  const alertasCalidad  = mounted ? ordenesConInspeccionPendiente.length : 0
+  const ordenesActivas      = mounted ? ordenes.filter((o) => o.estado === 'EN_PROCESO').length : 0
+  const inspeccionesPendientes = mounted ? ordenesConInspeccionPendiente.length : 0
   const sinLeer         = mounted ? alertas.filter((a) => !a.leida).length : 0
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
@@ -201,7 +201,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               key={item.href}
               item={item}
               isActive={isActive(item.href)}
-              badgeValue={item.badge === 'alertas' ? alertasCalidad : undefined}
+              badgeValue={
+                item.badge === 'inspeccion' ? inspeccionesPendientes :
+                item.badge === 'ordenes'    ? ordenesActivas :
+                undefined
+              }
             />
           ))}
 
