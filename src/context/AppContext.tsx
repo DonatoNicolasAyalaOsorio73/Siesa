@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react'
 import { cargarDeSheets, pushASheets } from '@/lib/sheetsSync'
+import { calcularProgresoOperacion } from '@/lib/manufactura'
 
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,8 @@ export interface Alerta {
     | 'NC_CERRADA'
     | 'TIEMPO_EXCEDIDO'
     | 'MAQUINA_DETENIDA'
+    | 'MUESTRA_APROBADA'
+    | 'MUESTRA_RECHAZADA'
   mensaje: string
   detalle?: string
   ordenId?: string
@@ -153,8 +156,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearTimeout(safety)
       if (ord && ord.length > 0) {
         setOrdenes(ord)
-        setOrdenesConInspeccionPendiente(ord.filter((o) => o.requiereInspeccion).map((o) => o.id))
-        setLotesRechazados(ord.filter((o) => o.estado === 'DETENIDA').map((o) => o.loteId))
+        // Deduplicar IDs al cargar (protección contra filas duplicadas en Sheets)
+        setOrdenesConInspeccionPendiente(Array.from(new Set(ord.filter((o) => o.requiereInspeccion).map((o) => o.id))))
+        setLotesRechazados(Array.from(new Set(ord.filter((o) => o.estado === 'DETENIDA').map((o) => o.loteId))))
       }
       if (mue && mue.length > 0) setMuestras(mue)
       if (ale && ale.length > 0) setAlertas(ale)
@@ -182,31 +186,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const orden = ordenesRef.current.find((o) => o.id === ordenId)
     if (!orden) return
 
-    const esUltimaOperacion = orden.operacionActual.indice >= orden.operacionActual.total
-    const nuevoIndice = Math.min(orden.operacionActual.indice + 1, orden.operacionActual.total)
-    const esCompletada = nuevoIndice >= orden.operacionActual.total
+    const { nuevoIndice, esCompletada, requiereInspeccion } = calcularProgresoOperacion(
+      orden.operacionActual,
+      orden.requiereInspeccion,
+    )
     const updated: OrdenProduccion = {
       ...orden,
       operacionActual: { ...orden.operacionActual, indice: nuevoIndice },
       estado: esCompletada ? 'COMPLETADA' : orden.estado,
       fechaFin: esCompletada ? new Date().toISOString() : orden.fechaFin,
-      requiereInspeccion: esCompletada || esUltimaOperacion ? true : orden.requiereInspeccion,
+      requiereInspeccion,
     }
     setOrdenes((prev) => prev.map((o) => (o.id === ordenId ? updated : o)))
     pushASheets('ordenes', 'PUT', updated as unknown as Record<string, unknown>)
 
-    setOrdenesConInspeccionPendiente((prev) =>
-      prev.includes(ordenId) ? prev : [...prev, ordenId]
-    )
-
-    crearAlerta({
-      tipo: 'INSPECCION_REQUERIDA',
-      mensaje: `Orden ${ordenId} requiere inspección de calidad`,
-      detalle: 'Operación completada — lote listo para revisión en Calidad',
-      ordenId,
-      link: '/calidad/inspecciones',
-      modulo: 'CALIDAD',
-    })
+    // Solo disparar inspección cuando la orden pasa a requerirla por primera vez
+    if (requiereInspeccion && !orden.requiereInspeccion) {
+      setOrdenesConInspeccionPendiente((prev) =>
+        prev.includes(ordenId) ? prev : [...prev, ordenId]
+      )
+      crearAlerta({
+        tipo: 'INSPECCION_REQUERIDA',
+        mensaje: `Orden ${ordenId} requiere inspección de calidad`,
+        detalle: `${orden.producto} · Lote ${orden.loteId}`,
+        ordenId,
+        loteId: orden.loteId,
+        link: '/calidad/inspecciones',
+        modulo: 'CALIDAD',
+      })
+    }
   }, [crearAlerta])
 
   // Limpia el flag de inspección pendiente cuando una inspección se cierra (aprobada o rechazada)

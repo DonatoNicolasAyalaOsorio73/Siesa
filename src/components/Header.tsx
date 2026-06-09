@@ -77,6 +77,8 @@ const ALERT_CONFIG: Record<
   NC_CERRADA:           { icon: '🔒', color: '#16B364', bg: '#E7F8EF', label: 'NC cerrada' },
   TIEMPO_EXCEDIDO:      { icon: '⏱️', color: '#F59E0B', bg: '#FEF3E2', label: 'Tiempo excedido' },
   MAQUINA_DETENIDA:     { icon: '🔧', color: '#EF4444', bg: '#FDECEC', label: 'Máquina detenida' },
+  MUESTRA_APROBADA:     { icon: '🧪', color: '#16B364', bg: '#E7F8EF', label: 'Muestra aprobada' },
+  MUESTRA_RECHAZADA:    { icon: '🧪', color: '#EF4444', bg: '#FDECEC', label: 'Muestra rechazada' },
 }
 
 // ─── ITEM DE NOTIFICACIÓN ─────────────────────────────────────────────────────

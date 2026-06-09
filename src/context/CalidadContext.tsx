@@ -111,6 +111,31 @@ interface CalidadState {
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
+// Prioridad al deduplicar: APROBADA/RECHAZADA > EN_PROCESO > PENDIENTE
+const PRIORIDAD_ESTADO: Record<Inspeccion['estado'], number> = {
+  APROBADA: 4, RECHAZADA: 3, EN_PROCESO: 2, PENDIENTE: 1,
+}
+
+function deduplicarInspecciones(lista: Inspeccion[]): Inspeccion[] {
+  const map = new Map<string, Inspeccion>()
+  for (const ins of lista) {
+    const existente = map.get(ins.ordenId)
+    if (!existente) {
+      map.set(ins.ordenId, ins)
+    } else {
+      const pNuevo = PRIORIDAD_ESTADO[ins.estado] ?? 0
+      const pExist = PRIORIDAD_ESTADO[existente.estado] ?? 0
+      if (
+        pNuevo > pExist ||
+        (pNuevo === pExist && new Date(ins.fechaDisparo) > new Date(existente.fechaDisparo))
+      ) {
+        map.set(ins.ordenId, ins)
+      }
+    }
+  }
+  return Array.from(map.values())
+}
+
 function crearInspeccionDesdeOrden(orden: OrdenProduccion): Inspeccion {
   return {
     id: `INS-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -151,7 +176,7 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       cargarDeSheets<EventoTrazabilidad>('trazabilidad'),
     ]).then(([ins, ncs, fic, trz]) => {
       clearTimeout(safety)
-      if (ins && ins.length > 0) setInspecciones(ins)
+      if (ins && ins.length > 0) setInspecciones(deduplicarInspecciones(ins))
       if (ncs && ncs.length > 0) setNoConformidades(ncs)
       if (fic && fic.length > 0) setFichasMutable(fic)
       if (trz && trz.length > 0) setTrazabilidad(trz)
@@ -165,8 +190,10 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
   useEffect(() => { inspeccionesRef.current = inspecciones }, [inspecciones])
   useEffect(() => { ordenesRef.current = ordenes }, [ordenes])
 
-  // Sincroniza nuevas inspecciones cuando Manufactura completa operaciones
+  // Sincroniza nuevas inspecciones cuando Manufactura completa operaciones.
+  // El guard `cargando` evita crear duplicados antes de que la carga inicial termine.
   useEffect(() => {
+    if (cargando) return
     const nuevasIds = ordenesConInspeccionPendiente.filter(
       (oid) => !inspeccionesRef.current.some((i) => i.ordenId === oid)
     )
@@ -197,7 +224,7 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
     nuevosEventos.forEach((ev) =>
       pushASheets('trazabilidad', 'POST', ev as unknown as Record<string, unknown>)
     )
-  }, [ordenesConInspeccionPendiente])
+  }, [ordenesConInspeccionPendiente, cargando])
 
   const aprobarInspeccion = useCallback(
     (id: string, resultados: ResultadoParametro[], observaciones: string) => {
@@ -379,8 +406,17 @@ export function CalidadProvider({ children }: { children: ReactNode }) {
       }
       setNoConformidades((prev) => [nueva, ...prev])
       pushASheets('noConformidades', 'POST', nueva as unknown as Record<string, unknown>)
+      crearAlerta({
+        tipo: 'NC_CREADA',
+        mensaje: `NC ${nueva.id} registrada — ${nueva.severidad}`,
+        detalle: `${nueva.tipoDefecto} · Orden ${nueva.ordenId}`,
+        ordenId: nueva.ordenId,
+        loteId: nueva.loteId,
+        link: '/calidad/no-conformidades',
+        modulo: 'CALIDAD',
+      })
     },
-    []
+    [crearAlerta]
   )
 
   const editarAccionCorrectiva = useCallback((ncId: string, accion: string) => {

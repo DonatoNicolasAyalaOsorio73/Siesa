@@ -80,6 +80,15 @@ export default function TrabajoProcesoCPage() {
   const [filtroEstado, setFiltroEstado] = useState<'TODOS' | OrdenProduccion['estado']>('TODOS')
   const [seleccionada, setSeleccionada] = useState<OrdenConCalidad | null>(null)
 
+  // Solo órdenes activas (no COMPLETADA) que requieren inspección.
+  // Las COMPLETADA ya pasaron a Entregas de Producto Terminado.
+  const inspeccionPendienteEnVista = ordenesConInspeccionPendiente.filter(
+    (id) => ordenes.some((o) => o.id === id && o.estado !== 'COMPLETADA')
+  )
+  const completadasConInspeccion = ordenesConInspeccionPendiente.filter(
+    (id) => ordenes.some((o) => o.id === id && o.estado === 'COMPLETADA')
+  ).length
+
   // Cruzar órdenes con inspecciones y NCs
   const ordenesConCalidad = useMemo<OrdenConCalidad[]>(() => {
     return ordenes
@@ -145,18 +154,23 @@ export default function TrabajoProcesoCPage() {
         ))}
       </div>
 
-      {/* Alerta inspecciones pendientes */}
-      {ordenesConInspeccionPendiente.length > 0 && (
+      {/* Alerta inspecciones pendientes — solo órdenes activas en esta vista */}
+      {inspeccionPendienteEnVista.length > 0 && (
         <div className="mb-4 flex items-start gap-3 bg-[#FFF7ED] border border-[#F59E0B]/25 rounded-xl p-4">
           <AlertTriangle size={16} className="text-[#F59E0B] shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-[#D97706]">
-              {ordenesConInspeccionPendiente.length} inspección{ordenesConInspeccionPendiente.length > 1 ? 'es' : ''} pendiente{ordenesConInspeccionPendiente.length > 1 ? 's' : ''}
+              {inspeccionPendienteEnVista.length} inspección{inspeccionPendienteEnVista.length > 1 ? 'es' : ''} pendiente{inspeccionPendienteEnVista.length > 1 ? 's' : ''}
             </p>
             <p className="text-xs text-[#5A6B85] mt-0.5">
-              Órdenes en manufactura que esperan revisión de Calidad:{' '}
-              {ordenesConInspeccionPendiente.join(', ')}
+              Órdenes activas que esperan revisión de Calidad:{' '}
+              {inspeccionPendienteEnVista.join(', ')}
             </p>
+            {completadasConInspeccion > 0 && (
+              <p className="text-xs text-[#97A4B8] mt-1">
+                +{completadasConInspeccion} orden{completadasConInspeccion > 1 ? 'es completadas' : ' completada'} pendiente{completadasConInspeccion > 1 ? 's' : ''} de inspección → ver en <span className="font-semibold">Entregas</span>
+              </p>
+            )}
           </div>
         </div>
       )}

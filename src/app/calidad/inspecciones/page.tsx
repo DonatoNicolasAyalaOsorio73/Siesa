@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { FlaskConical, Clock, AlertTriangle, CheckCircle2, XCircle, User, ChevronRight, Search } from 'lucide-react'
 import { useCalidadContext, tiempoEsperaMin, type Inspeccion, type ResultadoParametro } from '@/context/CalidadContext'
-import { useAppContext } from '@/context/AppContext'
 import { inspectoresDisponibles, SLA_MINUTOS, SLA_CRITICO_MINUTOS } from '@/data/calidadData'
 import PageHeader from '@/components/manufactura/PageHeader'
 import StatusBadge from '@/components/manufactura/StatusBadge'
@@ -45,7 +44,6 @@ function SlaChip({ min }: { min: number }) {
 
 export default function InspeccionesPage() {
   const { inspecciones, aprobarInspeccion, rechazarInspeccion, cambiarInspector, fichasMutable } = useCalidadContext()
-  const { ordenesConInspeccionPendiente } = useAppContext()
   const { toast, mostrarToast, cerrarToast } = useToast()
 
   const [filtroEstado, setFiltroEstado] = useState<typeof ESTADO_TABS[number]>('TODAS')
@@ -73,6 +71,10 @@ export default function InspeccionesPage() {
     acc[e] = mounted ? (e === 'TODAS' ? inspecciones.length : inspecciones.filter((i) => i.estado === e).length) : 0
     return acc
   }, {} as Record<string, number>)
+
+  const pendientesReales = mounted
+    ? inspecciones.filter((i) => i.estado === 'PENDIENTE' || i.estado === 'EN_PROCESO').length
+    : 0
 
   function abrirInspeccion(ins: Inspeccion) {
     setSeleccionada(ins)
@@ -121,10 +123,10 @@ export default function InspeccionesPage() {
     <div className="max-w-6xl mx-auto">
       <PageHeader titulo="Inspecciones de Calidad" subtitulo="Control de calidad en proceso — módulo Calidad">
         <div className="flex items-center gap-2">
-          {ordenesConInspeccionPendiente.length > 0 && (
+          {pendientesReales > 0 && (
             <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-[#FEF3E2] text-[#F59E0B] border border-[#FEF3E2]">
               <AlertTriangle size={12} />
-              {ordenesConInspeccionPendiente.length} inspecc. pendiente{ordenesConInspeccionPendiente.length > 1 ? 's' : ''}
+              {pendientesReales} inspecc. pendiente{pendientesReales > 1 ? 's' : ''}
             </span>
           )}
         </div>

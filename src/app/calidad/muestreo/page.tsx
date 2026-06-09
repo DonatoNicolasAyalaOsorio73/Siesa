@@ -189,7 +189,7 @@ function PanelMedicion({
 // ─── PÁGINA ───────────────────────────────────────────────────────────────────
 
 export default function MuestreoPage() {
-  const { muestras, actualizarMuestra, agregarMuestra, ordenes } = useAppContext()
+  const { muestras, actualizarMuestra, agregarMuestra, ordenes, crearAlerta } = useAppContext()
   const { fichasMutable: fichas } = useCalidadContext()
   const { toast, mostrarToast, cerrarToast } = useToast()
 
@@ -244,6 +244,19 @@ export default function MuestreoPage() {
         : 'Mediciones parciales guardadas',
       estado === 'APROBADA' ? 'success' : estado === 'RECHAZADA' ? 'error' : 'success'
     )
+    if (estado === 'APROBADA' || estado === 'RECHAZADA') {
+      crearAlerta({
+        tipo: estado === 'APROBADA' ? 'MUESTRA_APROBADA' : 'MUESTRA_RECHAZADA',
+        mensaje: estado === 'APROBADA'
+          ? `Muestra ${muestra.id} aprobada`
+          : `Muestra ${muestra.id} rechazada`,
+        detalle: `${muestra.producto} · Lote ${muestra.loteId} · Inspector: ${muestra.inspector}`,
+        ordenId: muestra.ordenId,
+        loteId: muestra.loteId,
+        link: '/calidad/muestreo',
+        modulo: 'CALIDAD',
+      })
+    }
   }
 
   function handleCrearMuestra() {
