@@ -4,136 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Siesa MES — Hub de Recursos</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink:      #15233B;
-    --blue:     #1F6CF0;
-    --blue-d:   #1450BE;
-    --blue-50:  #EAF2FE;
-    --green:    #16B364;
-    --green-50: #E7F8EF;
-    --violet:   #6E56E0;
-    --violet-50:#EEEBFB;
-    --amber:    #F59E0B;
-    --amber-50: #FEF3E2;
-    --red:      #EF4444;
-    --red-50:   #FDECEC;
-    --text:     #5A6B85;
-    --muted:    #97A4B8;
-    --bg:       #F4F7FB;
-    --surface:  #FFFFFF;
-    --border:   #E8EDF4;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Figtree', -apple-system, 'Segoe UI', sans-serif;
-    background: var(--bg); color: var(--ink); min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: #F4F7FB; color: #15233B; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
 
-  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 24px 60px; }
-
-  /* ── COVER ── */
+  /* ── COVER — idéntico a conversacion-siesa-mes.html ── */
   .cover {
-    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-d) 100%);
-    color: white; border-radius: 20px; padding: 44px 40px 40px; margin-bottom: 36px;
+    background: linear-gradient(135deg, #1F6CF0 0%, #1450BE 100%);
+    color: white; border-radius: 20px; padding: 48px 40px; margin-bottom: 36px;
   }
-  .cover-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
-  .cover-logo svg { width: 42px; height: 42px; flex-shrink: 0; }
-  .brand-name { font-size: 24px; font-weight: 800; }
-  .brand-tag  { font-size: 10.5px; color: rgba(255,255,255,.5); letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
-  .cover-title { font-size: 28px; font-weight: 800; letter-spacing: -.4px; margin-bottom: 8px; }
-  .cover-sub   { font-size: 14px; color: rgba(255,255,255,.7); margin-bottom: 28px; line-height: 1.6; }
-  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cover-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .cover-logo svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .brand-name { font-size: 26px; font-weight: 700; }
+  .brand-tag  { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: .08em; margin-top: 2px; }
+  .cover-title    { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .cover-subtitle { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 28px; line-height: 1.55; }
+  .cover-chips { display: flex; gap: 12px; flex-wrap: wrap; }
   .chip {
-    background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.22);
-    border-radius: 9px; padding: 8px 15px; font-size: 12.5px; line-height: 1.3; font-weight: 500;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; padding: 9px 16px; font-size: 13px; line-height: 1.3;
   }
-  .chip strong { display: block; font-size: 17px; font-weight: 800; }
+  .chip strong { display: block; font-size: 20px; font-weight: 700; line-height: 1.2; }
 
   /* ── SECCIÓN ── */
-  .sec { margin-bottom: 32px; }
-  .sec-label {
-    font-size: 10.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 14px; padding-left: 2px;
-    display: flex; align-items: center; gap: 10px;
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: #97A4B8; padding: 0 4px 12px;
   }
-  .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section { margin-bottom: 32px; }
 
-  /* ── CARDS ── */
-  .cards { display: grid; gap: 12px; }
+  /* ── CARDS — mismo patrón que .prompt ── */
+  .cards   { display: grid; gap: 12px; }
   .cards-2 { grid-template-columns: 1fr 1fr; }
-  @media(max-width:540px){ .cards-2 { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .cards-2 { grid-template-columns: 1fr; } }
 
   .card {
-    background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px;
-    padding: 20px 22px; display: flex; align-items: flex-start; gap: 16px;
-    text-decoration: none; color: inherit;
+    background: white; border-radius: 14px; border: 1px solid #E8EDF4;
+    overflow: hidden; text-decoration: none; color: inherit;
     transition: border-color .15s, box-shadow .15s, transform .12s;
+    display: flex; flex-direction: column;
   }
-  .card:hover { transform: translateY(-1px); }
-  .v-blue:hover   { border-color: var(--blue);   box-shadow: 0 4px 20px rgba(31,108,240,.11); }
-  .v-green:hover  { border-color: var(--green);  box-shadow: 0 4px 20px rgba(22,179,100,.11); }
-  .v-violet:hover { border-color: var(--violet); box-shadow: 0 4px 20px rgba(110,86,224,.11); }
-  .v-amber:hover  { border-color: var(--amber);  box-shadow: 0 4px 20px rgba(245,158,11,.11); }
-  .v-red:hover    { border-color: var(--red);    box-shadow: 0 4px 20px rgba(239,68,68,.11); }
-  .v-ink:hover    { border-color: var(--ink);    box-shadow: 0 4px 20px rgba(21,35,59,.09); }
+  .card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+  .card.blue:hover   { border-color: #1F6CF0; }
+  .card.green:hover  { border-color: #16B364; }
+  .card.violet:hover { border-color: #6E56E0; }
+  .card.amber:hover  { border-color: #F59E0B; }
+  .card.red:hover    { border-color: #EF4444; }
+  .card.dark:hover   { border-color: #15233B; }
 
-  .ci {
-    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  .card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; background: #F7FAFD; border-bottom: 1px solid #E8EDF4;
   }
-  .ci-b { background: var(--blue-50); }
-  .ci-g { background: var(--green-50); }
-  .ci-v { background: var(--violet-50); }
-  .ci-a { background: var(--amber-50); }
-  .ci-r { background: var(--red-50); }
-  .ci-x { background: #F1F3F8; }
+  .card-badge {
+    color: white; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;
+  }
+  .badge-blue   { background: #1F6CF0; }
+  .badge-green  { background: #16B364; }
+  .badge-violet { background: #6E56E0; }
+  .badge-amber  { background: #F59E0B; }
+  .badge-red    { background: #EF4444; }
+  .badge-dark   { background: #15233B; }
 
-  .cb { flex: 1; min-width: 0; }
-  .cb-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-  .cb-desc  { font-size: 12.5px; color: var(--text); line-height: 1.55; }
-  .cb-url {
+  .card-tag {
+    font-size: 11px; color: #97A4B8; margin-left: auto; font-family: 'SF Mono','Courier New',monospace;
+    background: #F4F7FB; padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+  }
+  .card-live {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; background: #E7F8EF; color: #16B364;
+    padding: 2px 8px; border-radius: 99px; margin-left: auto; flex-shrink: 0;
+  }
+  .card-live::before { content: '●'; font-size: 7px; }
+
+  .card-body {
+    padding: 14px 18px; font-size: 13px; line-height: 1.75; color: #2D3F5A; flex: 1;
+  }
+  .card-body strong { font-weight: 700; color: #15233B; }
+  .card-url {
     display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600;
-    color: var(--muted); font-family: 'SF Mono','Courier New',monospace;
-    background: var(--bg); padding: 3px 8px; border-radius: 5px;
-    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: #97A4B8; font-family: 'SF Mono','Courier New',monospace;
+    background: #F4F7FB; padding: 3px 8px; border-radius: 5px;
   }
 
-  .arr {
-    flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px;
-    background: var(--bg); display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--muted); align-self: center;
-    transition: background .15s, color .15s, transform .14s;
-  }
-  .v-blue:hover   .arr { background: var(--blue);   color: #fff; transform: translateX(2px); }
-  .v-green:hover  .arr { background: var(--green);  color: #fff; transform: translateX(2px); }
-  .v-violet:hover .arr { background: var(--violet); color: #fff; transform: translateX(2px); }
-  .v-amber:hover  .arr { background: var(--amber);  color: #fff; transform: translateX(2px); }
-  .v-red:hover    .arr { background: var(--red);    color: #fff; transform: translateX(2px); }
-  .v-ink:hover    .arr { background: var(--ink);    color: #fff; transform: translateX(2px); }
-
-  /* badge */
-  .bdg { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
-  .bdg-green  { background: var(--green-50);  color: var(--green); }
-  .bdg-blue   { background: var(--blue-50);   color: var(--blue); }
-  .bdg-violet { background: var(--violet-50); color: var(--violet); }
-  .bdg-live::before { content:'● '; font-size:8px; }
-
-  /* ── FOOTER ── */
+  /* ── FOOTER — idéntico ── */
   .footer {
-    text-align: center; font-size: 12px; color: var(--muted);
-    padding-top: 28px; border-top: 1px solid var(--border); margin-top: 8px; line-height: 1.9;
+    text-align: center; font-size: 11.5px; color: #97A4B8;
+    padding: 32px 0 12px; border-top: 1px solid #E8EDF4; margin-top: 8px;
   }
-  .footer a { color: var(--muted); text-decoration: none; font-weight: 600; }
-  .footer a:hover { color: var(--blue); }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="page">
 
   <!-- COVER -->
   <div class="cover">
@@ -146,15 +110,15 @@
       </svg>
       <div>
         <div class="brand-name">Siesa MES</div>
-        <div class="brand-tag">Manufacturing Execution System</div>
+        <div class="brand-tag">MANUFACTURING EXECUTION SYSTEM</div>
       </div>
     </div>
     <div class="cover-title">Hub de Recursos del Proyecto</div>
-    <div class="cover-sub">
-      Prototipo de módulo MES construido con IA — acceso rápido al prototipo,
+    <div class="cover-subtitle">
+      Prototipo de módulo MES construido con IA — acceso rápido al prototipo,<br>
       historial de construcción, código fuente, datos y documentación.
     </div>
-    <div class="chips">
+    <div class="cover-chips">
       <div class="chip"><strong>86</strong> Prompts con IA</div>
       <div class="chip"><strong>Claude Design</strong> UI/UX</div>
       <div class="chip"><strong>Claude Code</strong> Desarrollo</div>
@@ -166,108 +130,95 @@
   </div>
 
   <!-- PROTOTIPO -->
-  <div class="sec">
-    <div class="sec-label">Prototipo web</div>
+  <div class="section">
+    <div class="section-label">Prototipo web</div>
     <div class="cards">
-      <a href="https://siesa.vercel.app/" target="_blank" rel="noopener" class="card v-blue">
-        <div class="ci ci-b">🖥️</div>
-        <div class="cb">
-          <div class="cb-title">
-            Prototipo Web del Módulo MES
-            <span class="bdg bdg-green bdg-live">En producción</span>
-          </div>
-          <div class="cb-desc">
-            Módulo completo de Manufactura y Calidad — órdenes, inspecciones,
-            no conformidades, trazabilidad, muestreo, análisis IA y más.
-          </div>
-          <span class="cb-url">siesa.vercel.app</span>
+      <a href="https://siesa.vercel.app/" target="_blank" rel="noopener" class="card blue">
+        <div class="card-header">
+          <span class="card-badge badge-blue">🖥️ Prototipo Web</span>
+          <span class="card-live">En producción</span>
         </div>
-        <div class="arr">→</div>
+        <div class="card-body">
+          Módulo completo de <strong>Manufactura y Calidad</strong> — órdenes de producción, inspecciones,
+          no conformidades, trazabilidad, muestreo, análisis IA y más. Conectado a Google Sheets en tiempo real.
+          <br><span class="card-url">siesa.vercel.app</span>
+        </div>
       </a>
     </div>
   </div>
 
   <!-- DOCUMENTACIÓN -->
-  <div class="sec">
-    <div class="sec-label">Documentación del proceso</div>
+  <div class="section">
+    <div class="section-label">Documentación del proceso</div>
     <div class="cards cards-2">
-      <a href="https://siesa.vercel.app/conversacion-siesa-mes.html" target="_blank" rel="noopener" class="card v-amber">
-        <div class="ci ci-a">📜</div>
-        <div class="cb">
-          <div class="cb-title">Historial de Prompts</div>
-          <div class="cb-desc">86 prompts completos del proceso de construcción con Claude AI.</div>
-          <span class="cb-url">conversacion-siesa-mes.html</span>
+      <a href="https://siesa.vercel.app/conversacion-siesa-mes.html" target="_blank" rel="noopener" class="card amber">
+        <div class="card-header">
+          <span class="card-badge badge-amber">📜 Historial de Prompts</span>
         </div>
-        <div class="arr">→</div>
+        <div class="card-body">
+          Los <strong>86 prompts</strong> enviados a Claude AI durante el desarrollo del módulo, en orden cronológico.
+          <br><span class="card-url">conversacion-siesa-mes.html</span>
+        </div>
       </a>
-      <a href="https://www.loom.com/share/a342bd0719684785a9cd502f747704e0" target="_blank" rel="noopener" class="card v-red">
-        <div class="ci ci-r">🎬</div>
-        <div class="cb">
-          <div class="cb-title">Video Explicativo</div>
-          <div class="cb-desc">Demo en video — funcionamiento, flujos y módulos implementados.</div>
-          <span class="cb-url">loom.com/share/a342bd0…</span>
+      <a href="https://www.loom.com/share/a342bd0719684785a9cd502f747704e0" target="_blank" rel="noopener" class="card red">
+        <div class="card-header">
+          <span class="card-badge badge-red">🎬 Video Explicativo</span>
         </div>
-        <div class="arr">→</div>
+        <div class="card-body">
+          Demo en video del prototipo — <strong>funcionamiento, flujos y módulos</strong> implementados.
+          <br><span class="card-url">loom.com/share/a342bd0…</span>
+        </div>
       </a>
     </div>
   </div>
 
   <!-- CÓDIGO Y DATOS -->
-  <div class="sec">
-    <div class="sec-label">Código y datos</div>
+  <div class="section">
+    <div class="section-label">Código y datos</div>
     <div class="cards cards-2">
-      <a href="https://github.com/DonatoNicolasAyalaOsorio73/Siesa" target="_blank" rel="noopener" class="card v-ink">
-        <div class="ci ci-x">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#15233B">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
+      <a href="https://github.com/DonatoNicolasAyalaOsorio73/Siesa" target="_blank" rel="noopener" class="card dark">
+        <div class="card-header">
+          <span class="card-badge badge-dark">⌨ Código Fuente</span>
+          <span class="card-tag">Open source</span>
         </div>
-        <div class="cb">
-          <div class="cb-title">Código Fuente <span class="bdg bdg-blue">Open source</span></div>
-          <div class="cb-desc">Repositorio GitHub con el código del prototipo Next.js 14.</div>
-          <span class="cb-url">github.com/DonatoNicolas…/Siesa</span>
+        <div class="card-body">
+          Repositorio <strong>GitHub</strong> con el código completo del prototipo Next.js 14 con TypeScript.
+          <br><span class="card-url">github.com/DonatoNicolas…/Siesa</span>
         </div>
-        <div class="arr">→</div>
       </a>
-      <a href="https://docs.google.com/spreadsheets/d/1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY/edit?usp=sharing" target="_blank" rel="noopener" class="card v-green">
-        <div class="ci ci-g">📊</div>
-        <div class="cb">
-          <div class="cb-title">Base de Datos</div>
-          <div class="cb-desc">Google Sheets con órdenes, inspecciones, NCs, trazabilidad y más.</div>
-          <span class="cb-url">docs.google.com/spreadsheets</span>
+      <a href="https://docs.google.com/spreadsheets/d/1sypTWKl4pHVrs4r9VQ2uAUu7r9I7z5BaYWYE8iC4eGY/edit?usp=sharing" target="_blank" rel="noopener" class="card green">
+        <div class="card-header">
+          <span class="card-badge badge-green">📊 Base de Datos</span>
         </div>
-        <div class="arr">→</div>
+        <div class="card-body">
+          <strong>Google Sheets</strong> en vivo — órdenes, inspecciones, no conformidades, trazabilidad y alertas.
+          <br><span class="card-url">docs.google.com/spreadsheets</span>
+        </div>
       </a>
     </div>
   </div>
 
   <!-- CONSTRUCCIÓN CON IA -->
-  <div class="sec">
-    <div class="sec-label">Construcción con IA</div>
+  <div class="section">
+    <div class="section-label">Construcción con IA</div>
     <div class="cards">
-      <a href="https://claude.ai/share/86cc4afa-ddb3-4c95-a043-7b99480aae7d" target="_blank" rel="noopener" class="card v-violet">
-        <div class="ci ci-v">🤖</div>
-        <div class="cb">
-          <div class="cb-title">
-            Conversación con Claude AI
-            <span class="bdg bdg-violet">Anthropic</span>
-          </div>
-          <div class="cb-desc">
-            Sesión compartida donde se construyó el prototipo — manufactura, calidad,
-            notificaciones, trazabilidad y análisis IA, todo mediante prompting.
-          </div>
-          <span class="cb-url">claude.ai/share/86cc4afa…</span>
+      <a href="https://claude.ai/share/86cc4afa-ddb3-4c95-a043-7b99480aae7d" target="_blank" rel="noopener" class="card violet">
+        <div class="card-header">
+          <span class="card-badge badge-violet">🤖 Conversación Claude AI</span>
+          <span class="card-tag">Anthropic</span>
         </div>
-        <div class="arr">→</div>
+        <div class="card-body">
+          Sesión compartida donde se construyó el sistema completo con <strong>Claude AI</strong> —
+          arquitectura, módulos, integraciones, corrección de bugs y deploy en producción, todo mediante prompting.
+          <br><span class="card-url">claude.ai/share/86cc4afa-ddb3-4c95…</span>
+        </div>
       </a>
     </div>
   </div>
 
   <div class="footer">
-    Siesa MES · Diseño: <a href="https://claude.ai" target="_blank">Claude Design</a> &nbsp;·&nbsp;
-    Código: <a href="https://claude.ai/code" target="_blank">Claude Code</a> &nbsp;·&nbsp;
-    Prompts: <a href="https://claude.ai" target="_blank">Claude AI</a><br>
-    Desplegado en <a href="https://vercel.com" target="_blank">Vercel</a> · Junio 2026
+    Siesa MES · Diseño: Claude Design &nbsp;·&nbsp; Código: Claude Code &nbsp;·&nbsp; Prompts: Claude AI<br>
+    Desplegado en Vercel · Junio 2026
   </div>
 
 </div>
